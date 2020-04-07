@@ -10,11 +10,12 @@ class Lexer:
     # namedtuple is the id and then the regex/value
     Token = namedtuple('Token', ['id', 'value'])
 
-    INT = Token(0, '')
-    ID = Token(1, '')
-    STRING = Token(2, '')
-    REAL = Token(3, '')
-    COMMENT = Token(4, '')
+    INT = Token(0, "[0-9]+")
+    ID = Token(1, "[_a-zA-Z]\w*")
+    REAL = Token(2, '')
+
+    COMMENT = Token(3, '')
+    STRING = Token(4, '')
 
     # All of these could just be defined in the singleton_dict
 
@@ -62,9 +63,13 @@ class Lexer:
         # key = id
         # value = string value of the token
         singleton_dict = dict[(
+            # plus
             (5, '+'),
+            # left paren
             (6, '('),
+            # right paren
             (7, ')'),
+            # mult
             (8, '*'),
             # end of file
             (9, '')
