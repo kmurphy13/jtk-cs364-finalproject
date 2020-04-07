@@ -1,17 +1,29 @@
 import sys
+from collections import namedtuple
 from typing import Generator, Tuple
 import re
 class Lexer:
 
     # class variables that represent a code for a "kind" of token.
     # TODO Clean this up so it is much shorter
-    INTLIT = 0        # 1) setattr builtin function
-    PLUS   = 1        # 2) namedtuple
-    ID     = 2        # 3) named tuples are not typed Typed Named Tuple in
-    LPAREN = 3        #     the typehints doc in Python
-    RPAREN = 4        # 4) Class to represent a token
-    EOF    = 5 # TODO return special end-of-file token
-    MULT   = 6
+
+    # namedtuple is the id and then the regex/value
+    Token = namedtuple('Token', ['id', 'value'])
+
+    INT = Token(0, '')
+    ID = Token(1, '')
+    STRING = Token(2, '')
+    REAL = Token(3, '')
+    COMMENT = Token(4, '')
+
+    # All of these could just be defined in the singleton_dict
+
+    # PLUS = Token(5, '+')
+    # LPAREN = Token(6, '(')
+    # RPAREN = Token(7, ')')
+    # MULT = Token(8, '*')
+    # EOF = Token(9, '')  # TODO return special end-of-file token
+
 
     def __init__(self, fn: str):
         try:
@@ -42,6 +54,21 @@ class Lexer:
 
         # regular expression for an ID
         # regular expression for an integer literal
+        def is_token_type(token_type, token):
+            if re.findall(token_type[1], token):
+                yield (token_type[0], token)
+
+        # add all singletons
+        # key = id
+        # value = string value of the token
+        singleton_dict = dict[(
+            (5, '+'),
+            (6, '('),
+            (7, ')'),
+            (8, '*'),
+            # end of file
+            (9, '')
+        )]
 
         for line in self.f:
 
@@ -50,18 +77,18 @@ class Lexer:
             # these *before* you split the line
 
             tokens = (t for t in split_patt.split(line) if t)
+
             for t in tokens:
                 # TODO replace with a dictionary
-                if t == '+':
-                    yield (Lexer.PLUS, t)   # singleton
-                elif t == '*':
-                    yield (Lexer.MULT, t)
-                elif t == '(':
-                    yield (Lexer.LPAREN, t)
-                elif t == ')':
-                    yield (Lexer.RPAREN, t)
+
+                if singleton_dict[t]:
+                    yield(singleton_dict[t], t)
                 else:
-                    yield (Lexer.ID, t)    # singleton?
+                    is_token_type(Lexer.ID, t)
+                    is_token_type(Lexer.STRING, t)
+                    is_token_type(Lexer.INT, t)
+                    is_token_type(Lexer.REAL, t)
+                    is_token_type(Lexer.COMMENT, t)
 
 
 if __name__ == "__main__":

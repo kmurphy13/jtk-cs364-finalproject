@@ -27,16 +27,17 @@ Learn how to use command line arguments when your program is run from Pycharm. W
 3) Exit gracefully with an appropriate error message if the file being processed does not exist.
 4) Have nicely formatted output listing the token recognized, the name of the token, and the line number the token was found on. For example, something like the following wold do.
 
-Token            Name                      Line Number
-------------------------------------------------------
-Keyword          if                        1
-Left paren       (                         1
-Right paren      )                         2
-identifer        count                     2
-greater-equal    >=                        4
-equal-equal      ==                        4
-assignment       =                         8
-This table is produced by your main program, not your Lexer class/function/generator.
+    Token            Name                      Line Number
+    ------------------------------------------------------
+    Keyword          if                        1
+    Left paren       (                         1
+    Right paren      )                         2
+    identifer        count                     2
+    greater-equal    >=                        4
+    equal-equal      ==                        4
+    assignment       =                         8
+    This table is produced by your main program, not your Lexer class/function/generator.
+
 5) Recognize // comments properly but the lexer should not return them as a token. It should skip over or toss them. We do not want to see comments in the output.
 6) Ignore (toss) all whitespace.
 7) Correctly identify lexical errors. Produce a reasonable error message and a line number. What are possible lexical errors? You lexer should continue after it finds an error and not crash or quit.
