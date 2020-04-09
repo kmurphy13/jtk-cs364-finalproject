@@ -72,6 +72,7 @@ class Lexer:
         LOR[1]: LOR[0],
         LAND[1]: LAND[0],
         EQUAL[1]: EQUAL[0],
+        NEQUAL[1]: NEQUAL[0],
         LT[1]: LT[0],
         LEQ[1]: LEQ[0],
         GT[1]: GT[0],
@@ -155,10 +156,10 @@ class Lexer:
         elif re.match(Lexer.REAL[1], token):
             return Lexer.REAL[0], token, line_num
         elif re.match(Lexer.COMMENT[1], token):
-            return 'Comment: ' + token + ', ' + str(line_num)
+            return "COMMENT"
+            # return 'Comment: ' + token + ', ' + str(line_num)
         else:
-            return 'Illegal token: ' + token + ', Line number: ' + str(line_num)
-
+            return ("ILLEGAL", 'Illegal token: ' + token + ', Line number: ' + str(line_num))
     def token_generator(self) -> Generator[Tuple[int, str], None, None]:
 
         # TODO Can we make this more readable by putting this elsewhere?
@@ -187,6 +188,10 @@ class Lexer:
 
                 if t in self.singleton_dict:
                     yield (self.singleton_dict[t], t, line_count)
+                elif "COMMENT" == self.check_non_singletons(t, line_count):
+                    pass
+                elif "ILLEGAL" == self.check_non_singletons(t, line_count)[0]:
+                    print(self.check_non_singletons(t, line_count)[1])
                 else:
                     yield self.check_non_singletons(t, line_count)  # testing regex
 
@@ -195,8 +200,11 @@ class Lexer:
 
 if __name__ == "__main__":
     lex = Lexer(sys.argv[1])  # use command line arguments
-
     g = lex.token_generator()
+
+    print("Token            Name                      Line Number")
+    print("------------------------------------------------------")
+
     while True:
 
         try:
