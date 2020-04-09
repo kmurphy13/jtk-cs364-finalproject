@@ -72,7 +72,7 @@
 
 	// a string literal in a comment should be OK
     // this is a "comment and not a string literal"
-
+    5 === 4
 	// you can have illegal characters in a comment user@email.com `@# '
 
 	"illegal characters in a string user@email.com `@# ' "

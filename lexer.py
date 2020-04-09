@@ -191,7 +191,6 @@ class Lexer:
                     yield self.check_non_singletons(t, line_count)  # testing regex
             # increment line count
             line_count += 1
-        line_count += 1
 
         # yield end-of-file token
         yield (Lexer.EOF.id, Lexer.EOF.description), Lexer.EOF.value, line_count
