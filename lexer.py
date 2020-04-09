@@ -173,14 +173,15 @@ class Lexer:
             return "ILLEGAL", 'Invalid character sequence "' + token + '" on line: ' + str(line_num)
 
     def token_generator(self) -> Generator[Tuple[int, str], None, None]:
+
+        # keep line number variable
         line_count = 1
+
+        # iterate over all off the lines in the file
         for line in self.f:
-            # save recognizing string literals and comments
-            # until the end (do these last). Try and recognize
-            # these *before* you split the line
 
+            # get the tokens on the line
             tokens = (t for t in self.split_patt.split(line) if t)
-
             for t in tokens:
                 if t in self.singleton_dict:
                     yield (self.singleton_dict[t], t, line_count)
@@ -193,9 +194,11 @@ class Lexer:
                     print()
                 else:
                     yield self.check_non_singletons(t, line_count)  # testing regex
-
+            # increment line count
             line_count += 1
         line_count += 1
+
+        # yield end-of-file token
         yield (Lexer.EOF.id, Lexer.EOF.description), Lexer.EOF.value, line_count
 
 
@@ -206,12 +209,12 @@ if __name__ == "__main__":
     # generate tokens
     g = lex.token_generator()
 
+    # print headers
     print("%-20s %-65s %-20s" %("Token", "Name", "Line Number"))
     print("-----------------------------------------------------------------------------------------------------")
 
     while True:
         try:
-            # print(next(g))
             p = next(g)
             print("%-20s %-65s %-20i" %(p[0][1], p[1], p[2]))
 
