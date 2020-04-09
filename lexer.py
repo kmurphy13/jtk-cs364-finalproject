@@ -1,4 +1,3 @@
-import sys
 from collections import namedtuple
 from typing import Generator, Tuple
 import re
@@ -8,7 +7,6 @@ import sys
 class Lexer:
 
     # class variables that represent a code for a "kind" of token.
-    # TODO Clean this up so it is much shorter
 
     # namedtuple is the id and then the regex/value
     Token = namedtuple('Token', ['id', 'value'])
@@ -18,12 +16,12 @@ class Lexer:
     REAL = Token(2, '\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*')
     COMMENT = Token(3, '\/\/.*')
     STRING = Token(4, '".*"')
-    # TODO: Fix above ^
+
     PLUS = Token(5, '+')
     LPAREN = Token(6, '(')
     RPAREN = Token(7, ')')
     MULT = Token(8, '*')
-    EOF = Token(9, '') #TODO what is the end-of-file token
+    EOF = Token(9, '')
     PRINT = Token(10, 'print')
     BOOL = Token(11, 'bool')
     ELSE = Token(12, 'else')
@@ -161,21 +159,6 @@ class Lexer:
         else:
             return ("ILLEGAL", 'Illegal token: ' + token + ', Line number: ' + str(line_num))
     def token_generator(self) -> Generator[Tuple[int, str], None, None]:
-
-        # TODO Can we make this more readable by putting this elsewhere?
-        # check out the documentation on |
-        # Don't forget about ^ and $
-        # TEST TEST TEST try and break your code
-        # SOLID
-
-
-        # regular expression for an ID
-        # regular expression for an integer literal
-
-
-        # add all singletons
-        # key = id
-        # value = string value of the token
         line_count = 1
         for line in self.f:
             # save recognizing string literals and comments
@@ -184,8 +167,6 @@ class Lexer:
 
             tokens = (t for t in self.split_patt.split(line) if t)
             for t in tokens:
-                # TODO replace with a dictionary
-
                 if t in self.singleton_dict:
                     yield (self.singleton_dict[t], t, line_count)
                 elif "COMMENT" == self.check_non_singletons(t, line_count):
@@ -196,17 +177,21 @@ class Lexer:
                     yield self.check_non_singletons(t, line_count)  # testing regex
 
             line_count += 1
+        line_count += 1
+        yield Lexer.EOF.id, Lexer.EOF.value, line_count
 
 
 if __name__ == "__main__":
-    lex = Lexer(sys.argv[1])  # use command line arguments
+    # use command line args
+    lex = Lexer(sys.argv[1])
+
+    # generate tokens
     g = lex.token_generator()
 
     print("Token            Name                      Line Number")
     print("------------------------------------------------------")
 
     while True:
-
         try:
             print(next(g))
         except StopIteration:
