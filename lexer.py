@@ -50,8 +50,6 @@ class Lexer:
     LCBRAC = Token(36, '{')
     RCBRAC = Token(37, '}')
 
-
-
     singleton_dict = {
         PLUS[1]: PLUS[0],
         LPAREN[1]: LPAREN[0],
@@ -84,11 +82,9 @@ class Lexer:
         LSBRAC[1]: LSBRAC[0],
         RSBRAC[1]: RSBRAC[0],
         LCBRAC[1]: LCBRAC[0],
-        RSBRAC[1]: RSBRAC[0]
-
-
-
+        RCBRAC[1]: RCBRAC[0]
     }
+
     split_patt = re.compile(
         r"""               #  Split on:
            \s     |        #  whitespace
