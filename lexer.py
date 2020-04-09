@@ -102,7 +102,7 @@ class Lexer:
     split_patt = re.compile(
         r"""               #  Split on:
            \s     |        #  whitespace
-           
+       
            (\+)   |        #  operator: plus
            (\*)   |        #  operator: times
            (^/$)  |        #  operator: divide
@@ -138,14 +138,10 @@ class Lexer:
            (\bwhile\b)  |    # keyword: while
            (\bfloat\b)  |    # keyword: float
            (\bint\b)    |    # keyword: int
-           (\bmain\b)    |    # keyword: main
-           (\bchar\b)    |    # keyword: int
-           
-           (^\d[_\d]*$)                            |   # integer
-           (\d[._\d]*(?:e[+-]?)*[._\d]*)           |   # real number 
-           ([_a-zA-Z]\w*)                          |   # identifier
-           (".*")                                  |   # string      TODO: This seems too simple
-           (\/\/.*)                                |   # comment
+           (\bmain\b)   |    # keyword: main
+           (\bchar\b)   |   # keyword: int
+           (//.*)       |   # comment
+           (".*")    
         """,
         re.VERBOSE
     )
