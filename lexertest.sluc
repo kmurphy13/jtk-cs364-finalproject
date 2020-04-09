@@ -58,7 +58,7 @@
 
 	// scientific notation
 	3e-9  // 3 times ten to the minus 9
-	-2.34e9  // two tokens! - and 2.34e9
+	-2.34e+9  // two tokens! - and 2.34e9
 
 	// scientific notation can use underscores
 	3_123.456_789e-1_2
