@@ -9,11 +9,11 @@ class Lexer:
     # class variables that represent a code for a "kind" of token.
 
     # namedtuple is the id and then the regex/value
-    Token = namedtuple('Token', ['id', 'value', 'description'])
+    Token = namedtuple('Token', ['id', 'value'])
 
     INT = Token(0, "(?:^\d[_\d]*\d$)|^\d*$")
-    ID = Token(1, "[_a-zA-Z]\w*")
-    REAL = Token(2, '^\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*$')
+    ID = Token(1, "^[_a-zA-Z]\w*$")
+    REAL = Token(2, '^\d+(?:[_\d]*\d)?(?:\.\d|e[+-]?\d+(?:[_\d]*\d)?)(?:[_\d]*\d)*(?:e[+-]?\d+(?:[_\d]*\d)?)?$')
     COMMENT = Token(3, '\/\/.*')
     STRING = Token(4, '".*"')
 
