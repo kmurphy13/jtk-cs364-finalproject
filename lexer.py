@@ -40,10 +40,16 @@ class Lexer:
     GT = Token(26, '>')
     GEQ = Token(27, '>=')
     MINUS = Token(28, '-')
-    BITSHIFTL = (29, '<<')
-    BITSHIFTR = (30, '>>')
-    COMMA = (31, ',')
-    SEMICOLON = (32, ';')
+    BITSHIFTL = Token(29, '<<')
+    BITSHIFTR = Token(30, '>>')
+    COMMA = Token(31, ',')
+    SEMICOLON = Token(32, ';')
+    EQ = Token(33, '=')
+    LSBRAC = Token(34, '[')
+    RSBRAC = Token(35, ']')
+    LCBRAC = Token(36, '{')
+    RCBRAC = Token(37, '}')
+
 
 
     singleton_dict = {
@@ -73,7 +79,14 @@ class Lexer:
         BITSHIFTL[1]: BITSHIFTL[0],
         BITSHIFTR[1]: BITSHIFTR[0],
         COMMA[1]: COMMA[0],
-        SEMICOLON[1]: SEMICOLON[0]
+        SEMICOLON[1]: SEMICOLON[0],
+        EQ[1]: EQ[0],
+        LSBRAC[1]: LSBRAC[0],
+        RSBRAC[1]: RSBRAC[0],
+        LCBRAC[1]: LCBRAC[0],
+        RSBRAC[1]: RSBRAC[0]
+
+
 
     }
     split_patt = re.compile(
@@ -103,6 +116,8 @@ class Lexer:
            (})    |        #  punctuation: right bracket
            (\()   |        #  punctuation: left parenthesis
            (\))   |        #  punctuation: right parenthesis
+           (\[)   |        #  punctuation: Left bracket
+           (\])   |        #  punctuation: right bracket
            
            (\bprint\b)  |    # keyword: print
            (\bbool\b)   |    # keyword: bool
