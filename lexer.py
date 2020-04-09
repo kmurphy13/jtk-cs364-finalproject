@@ -10,11 +10,11 @@ class Lexer:
     # namedtuple is the id and then the regex/value
     Token = namedtuple('Token', ['id', 'value'])
 
-    INT = Token(0, "[1-9]+")
+    INT = Token(0, "^\d[_\d]*$")
     ID = Token(1, "[_a-zA-Z]\w*")
-    REAL = Token(2, '')
-    COMMENT = Token(3, '')
-    STRING = Token(4, '')
+    REAL = Token(2, '[+-]?\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*')
+    COMMENT = Token(3, '\/\/.*')
+    STRING = Token(4, '".*"')
     # TODO: Fix above ^
     PLUS = Token(5, '+')
     LPAREN = Token(6, '(')
@@ -47,18 +47,18 @@ class Lexer:
 
 
     singleton_dict = {
-        PLUS[1]: PLUS[0], #
-        LPAREN[1]: LPAREN[0], #
-        RPAREN[1]: RPAREN[0], #
-        MULT[1]: MULT[0],  #
+        PLUS[1]: PLUS[0],
+        LPAREN[1]: LPAREN[0],
+        RPAREN[1]: RPAREN[0],
+        MULT[1]: MULT[0],
         EOF[1]: EOF[0],
-        PRINT[1]: PRINT[0],#
-        BOOL[1]: BOOL[0], #
-        ELSE[1]: ELSE[0],#
-        FALSE[1]: FALSE[0],#
-        IF[1]: IF[0],#
-        TRUE[1]: TRUE[0],#
-        WHILE[1]: WHILE[0],#
+        PRINT[1]: PRINT[0],
+        BOOL[1]: BOOL[0],
+        ELSE[1]: ELSE[0],
+        FALSE[1]: FALSE[0],
+        IF[1]: IF[0],
+        TRUE[1]: TRUE[0],
+        WHILE[1]: WHILE[0],
         DIV[1]: DIV[0],
         MOD[1]: MOD[0],
         NOT[1]: NOT[0],
@@ -69,11 +69,11 @@ class Lexer:
         LEQ[1]: LEQ[0],
         GT[1]: GT[0],
         GEQ[1]: GEQ[0],
-        MINUS[1]: MINUS[0], #
-        BITSHIFTL[1]:BITSHIFTL[0],
-        BITSHIFTR[1]:BITSHIFTR[0],
+        MINUS[1]: MINUS[0],
+        BITSHIFTL[1]: BITSHIFTL[0],
+        BITSHIFTR[1]: BITSHIFTR[0],
         COMMA[1]: COMMA[0],
-        SEMICOLON[1]:SEMICOLON[0]
+        SEMICOLON[1]: SEMICOLON[0]
 
     }
     split_patt = re.compile(
@@ -133,6 +133,20 @@ class Lexer:
             print("Exiting")
             sys.exit(0)  # can't go on
 
+    def check_non_singletons(self, token: str, line_num: int):
+        if re.match(Lexer.ID[1], token):
+            return Lexer.ID[0], token, line_num
+        elif re.match(Lexer.STRING[1], token):
+            return Lexer.STRING[0], token, line_num
+        elif re.match(Lexer.INT[1], token):
+            return Lexer.INT[0], token, line_num
+        elif re.match(Lexer.REAL[1], token):
+            return Lexer.REAL[0], token, line_num
+        elif re.match(Lexer.COMMENT[1], token):
+            return 'Comment: ' + token + ', ' + str(line_num)
+        else:
+            return 'Illegal token: ' + token + ', Line number: ' + str(line_num)
+
     def token_generator(self) -> Generator[Tuple[int, str], None, None]:
 
         # TODO Can we make this more readable by putting this elsewhere?
@@ -144,17 +158,13 @@ class Lexer:
 
         # regular expression for an ID
         # regular expression for an integer literal
-        # def is_token_type(token_type, token):
-        #     if re.findall(token_type[0], token):
-        #         yield (token_type[1], token)
+
 
         # add all singletons
         # key = id
         # value = string value of the token
-
-
+        line_count = 1
         for line in self.f:
-
             # save recognizing string literals and comments
             # until the end (do these last). Try and recognize
             # these *before* you split the line
@@ -164,15 +174,11 @@ class Lexer:
                 # TODO replace with a dictionary
 
                 if t in self.singleton_dict:
-                    yield (self.singleton_dict[t], t)
+                    yield (self.singleton_dict[t], t, line_count)
                 else:
-                    yield t # testing regex
-                # else:
-                #     is_token_type(Lexer.ID, t)
-                #     is_token_type(Lexer.STRING, t)
-                #     is_token_type(Lexer.INT, t)
-                #     is_token_type(Lexer.REAL, t)
-                #     is_token_type(Lexer.COMMENT, t)
+                    yield self.check_non_singletons(t, line_count)  # testing regex
+
+            line_count += 1
 
 
 if __name__ == "__main__":
