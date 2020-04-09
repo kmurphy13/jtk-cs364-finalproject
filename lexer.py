@@ -66,35 +66,52 @@ class Lexer:
         MINUS[1]: MINUS[0] #
     }
     split_patt = re.compile(
-        r"""             # Split on 
-           (\+) |        #  plus and capture
-           (\*) |        #  times and capture
-           \s   |        #  whitespace
-           (\() |        #  left paren and capture
-           (\)) |        #  right paren and capture
-           (\/) |       # divide and capture
-           (\|\|)|  
-           (&&) |   
-           (==) | 
-           (!=) | 
-           (<=) | 
-           (>=) | 
-           (>)  |   
-           (<)  | 
-           (-)  | 
-           (%)  | 
-           (!)  | 
-           (\b(print)\b) |
-           (\b(bool)\b) |
-           (\b(else)\b) |
-           (\b(false)\b) |
-           (\b(if)\b) |
-           (\b(true)\b) |
-           (\b(while)\b) 
-    
+        r"""               #  Split on:
+           \s     |        #  whitespace
+           
+           (\+)   |        #  operator: plus
+           (\*)   |        #  operator: times
+           (/)    |        #  operator: divide
+           (-)    |        #  operator: subtract 
+           (\|\|) |        #  operator: or
+           (&&)   |        #  operator: and
+           (==)   |        #  operator: equal
+           (!=)   |        #  operator: not equal
+           (<=)   |        #  operator: less than or equal
+           (>=)   |        #  operator: greater than or equal
+           (>)    |        #  operator: greater than
+           (<)    |        #  operator: less than
+           (%)    |        #  operator: mod
+           (!)    |        #  operator: not 
+           
+           (;)    |        #  punctuation: semicolon
+           (,)    |        #  punctuation: comma
+           ({)    |        #  punctuation: left bracket
+           (})    |        #  punctuation: right bracket
+           (\()   |        #  punctuation: left parenthesis
+           (\))   |        #  punctuation: right parenthesis
+           
+           (\b(print)\b)  |    # keyword: print
+           (\b(bool)\b)   |    # keyword: bool
+           (\b(else)\b)   |    # keyword: else
+           (\b(false)\b)  |    # keyword: false
+           (\b(if)\b)     |    # keyword: if
+           (\b(true)\b)   |    # keyword: true
+           (\b(while)\b)  |    # keyword: while
+           (\b(float)\b)  |    # keyword: float
+           (\b(int)\b)    |    # keyword: int
+           
+           (\d[_\d]*)     |                      # integer     TODO: Do plus/minus need to be included? Also not sure about the ^ and $ 
+           (\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*) |  # real number TODO: This currently matches integers too, but I'm thinking that it may be okay because it comes after...? 
+           ([_a-zA-Z]\w*)                     |  # identifier
+           (".*")                             |  # string      TODO: This seems too simple
+           (\/\/.*)                           |  # comment
         """,
         re.VERBOSE
     )
+
+
+
 
     def __init__(self, fn: str):
         try:
