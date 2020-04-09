@@ -141,8 +141,9 @@ class Lexer:
            (\bmain\b)    |    # keyword: main
            (\bchar\b)    |    # keyword: int
            
-           (\d[._\d]*(?:e[+-]?)*[._\d]*)           |   # real number and integer 
-           ([_a-zA-Z]\w*)                         |   # identifier
+           (^\d[_\d]*$)                            |   # integer
+           (\d[._\d]*(?:e[+-]?)*[._\d]*)           |   # real number 
+           ([_a-zA-Z]\w*)                          |   # identifier
            (".*")                                  |   # string      TODO: This seems too simple
            (\/\/.*)                                |   # comment
         """,
