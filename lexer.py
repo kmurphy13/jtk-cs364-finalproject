@@ -9,7 +9,7 @@ class Lexer:
     # class variables that represent a code for a "kind" of token.
 
     # namedtuple is the id and then the regex/value
-    Token = namedtuple('Token', ['id', 'value'])
+    Token = namedtuple('Token', ['id', 'value', 'description'])
 
     INT = Token(0, "(?:^\d[_\d]*\d$)|^\d*$")
     ID = Token(1, "[_a-zA-Z]\w*")
@@ -29,10 +29,11 @@ class Lexer:
     IF = Token(14, 'if')
     TRUE = Token(15, 'true')
     WHILE = Token(16, 'while')
-    DIV = Token(17, '/')
-    MOD = Token(18, '%')
-    NOT = Token(19, '!')
-    LOR = Token(20, '||')
+    INTK = Token(17, 'int')
+    CHAR = Token(18, 'char')
+    MAIN = Token(19, 'main')
+    FLOAT = Token(20, 'float')
+
     LAND = Token(21, '&&')
     EQUAL = Token(22, '==')
     NEQUAL = Token(23, '!=')
@@ -50,6 +51,10 @@ class Lexer:
     RSBRAC = Token(35, ']')
     LCBRAC = Token(36, '{')
     RCBRAC = Token(37, '}')
+    DIV = Token(38, '/')
+    MOD = Token(39, '%')
+    NOT = Token(40, '!')
+    LOR = Token(41, '||')
 
     singleton_dict = {
         PLUS[1]: PLUS[0],
@@ -84,7 +89,12 @@ class Lexer:
         LSBRAC[1]: LSBRAC[0],
         RSBRAC[1]: RSBRAC[0],
         LCBRAC[1]: LCBRAC[0],
-        RCBRAC[1]: RCBRAC[0]
+        RCBRAC[1]: RCBRAC[0],
+        INTK[1]: INTK[0],
+        CHAR[1]: CHAR[0],
+        MAIN[1]: MAIN[0],
+        FLOAT[1]: FLOAT[0]
+
     }
 
     split_patt = re.compile(
@@ -126,6 +136,8 @@ class Lexer:
            (\bwhile\b)  |    # keyword: while
            (\bfloat\b)  |    # keyword: float
            (\bint\b)    |    # keyword: int
+           (\bmain\b)    |    # keyword: main
+           (\bchar\b)    |    # keyword: int
            
            (^\d[_\d]*$)                            |   # integer     TODO: Do plus/minus need to be included? Also not sure about the ^ and $ 
            (\d[._\d]*(?:e[+-]?)*[._\d]*)           |   # real number 

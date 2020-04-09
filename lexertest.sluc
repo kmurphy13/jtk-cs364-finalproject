@@ -82,3 +82,4 @@
 	"a string // literal" "// and another"   // two string lit tokens
 
 	"a string \"literal\" that contains \"escaped\" double quotes"  // one token
+	char main int float
