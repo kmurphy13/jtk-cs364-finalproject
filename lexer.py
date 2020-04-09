@@ -102,10 +102,10 @@ class Lexer:
     split_patt = re.compile(
         r"""               #  Split on:
            \s     |        #  whitespace
-           ((?<!e)\+)   |        #  operator: plus
+           ((?<!\de)\+)   |        #  operator: plus
            (\*)   |        #  operator: times
            (^/$)  |        #  operator: divide
-           ((?<!e)-)    |        #  operator: subtract 
+           ((?<!\de)-)    |        #  operator: subtract 
            (<<)   |        #  operator: bitshift left
            (>>)   |        #  operator: bitshift right
            (\|\|) |        #  operator: or

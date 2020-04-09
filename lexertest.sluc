@@ -13,6 +13,7 @@
 
   	fred zoo    		identifier   // three identifiers
 
+    blue+blue
     // all keywords
   	bool else if print false true int main while char float   // this is a comment
 
@@ -63,7 +64,6 @@
 
 	// scientific notation can use underscores
 	3_123.456_789e-1_2
-
 	_123_456   // this is an identifier
 	123_       // illegal, cannot end with an underscore
 
