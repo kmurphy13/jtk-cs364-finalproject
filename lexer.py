@@ -140,7 +140,7 @@ class Lexer:
            (\bmain\b)   |    # keyword: main
            (\bchar\b)   |   # keyword: int
            (//.*)       |   # comment
-           (".*")    
+           ("(?:\\.|[^"\\])*")    
         """,
         re.VERBOSE
     )
