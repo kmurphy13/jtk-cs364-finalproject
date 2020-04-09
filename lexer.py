@@ -15,7 +15,7 @@ class Lexer:
     INT = Token(0, "(?:^\d[_\d]*\d$)|^\d*$", 'integer')
     ID = Token(1, "^[_a-zA-Z]\w*$", 'identifier')
     REAL = Token(2, '^\d+(?:[_\d]*\d)?(?:\.\d|e[+-]?\d+(?:[_\d]*\d)?)(?:[_\d]*\d)*(?:e[+-]?\d+(?:[_\d]*\d)?)?$', 'real-number')
-    COMMENT = Token(3, '\/\/.*', 'comment')
+    COMMENT = Token(3, '//.*', 'comment')
     STRING = Token(4, '".*"', 'string-literal')
 
     # singleton tokens
@@ -91,7 +91,7 @@ class Lexer:
         LSBRAC[1]: (LSBRAC[0], LSBRAC[2]),
         RSBRAC[1]: (RSBRAC[0], RSBRAC[2]),
         LCBRAC[1]: (LCBRAC[0], LCBRAC[2]),
-        RCBRAC[1]: (RCBRAC[0], LCBRAC[2]),
+        RCBRAC[1]: (RCBRAC[0], RCBRAC[2]),
         INTK[1]: (INTK[0], INTK[2]),
         CHAR[1]: (CHAR[0], CHAR[2]),
         MAIN[1]: (MAIN[0], MAIN[2]),
