@@ -173,7 +173,7 @@ class Lexer:
             return "COMMENT"
             # return 'Comment: ' + token + ', ' + str(line_num)
         else:
-            return ("ILLEGAL", 'Illegal token: ' + token + ', Line number: ' + str(line_num))
+            return ("ILLEGAL", 'Unrecognized character sequence "' + token + '" at  line number: ' + str(line_num))
     def token_generator(self) -> Generator[Tuple[int, str], None, None]:
         line_count = 1
         for line in self.f:
@@ -189,8 +189,8 @@ class Lexer:
                 elif "COMMENT" == self.check_non_singletons(t, line_count):
                     pass
                 elif "ILLEGAL" == self.check_non_singletons(t, line_count)[0]:
-                    # print(self.check_non_singletons(t, line_count)[1])
-                    pass
+                    print(self.check_non_singletons(t, line_count)[1])
+                    # pass
                 else:
                     yield self.check_non_singletons(t, line_count)  # testing regex
 
