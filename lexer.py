@@ -11,13 +11,14 @@ class Lexer:
     # namedtuple is the id and then the regex/value
     Token = namedtuple('Token', ['id', 'value', 'description'])
 
-
+    # non-singleton tokens
     INT = Token(0, "(?:^\d[_\d]*\d$)|^\d*$", 'integer')
     ID = Token(1, "^[_a-zA-Z]\w*$", 'identifier')
     REAL = Token(2, '^\d+(?:[_\d]*\d)?(?:\.\d|e[+-]?\d+(?:[_\d]*\d)?)(?:[_\d]*\d)*(?:e[+-]?\d+(?:[_\d]*\d)?)?$', 'real-number')
     COMMENT = Token(3, '\/\/.*', 'comment')
     STRING = Token(4, '".*"', 'string-literal')
 
+    # singleton tokens
     PLUS = Token(5, '+', 'plus sign')
     LPAREN = Token(6, '(', 'left paren')
     RPAREN = Token(7, ')', 'right paren')
@@ -34,7 +35,6 @@ class Lexer:
     CHAR = Token(18, 'char', 'keyword')
     MAIN = Token(19, 'main', 'keyword')
     FLOAT = Token(20, 'float', 'keyword')
-
     LAND = Token(21, '&&', 'logical and')
     EQUAL = Token(22, '==', 'equal-equal')
     NEQUAL = Token(23, '!=', 'not equal')
@@ -57,7 +57,7 @@ class Lexer:
     NOT = Token(40, '!', 'not')
     LOR = Token(41, '||', 'logical or')
 
-
+    # dictionary of singleton tokens
     singleton_dict = {
         PLUS[1]: (PLUS[0], PLUS[2]),
         LPAREN[1]: (LPAREN[0], LPAREN[2]),
@@ -97,7 +97,6 @@ class Lexer:
         MAIN[1]: (MAIN[0], MAIN[2]),
         FLOAT[1]: (FLOAT[0], FLOAT[2]),
         EOF[1]: (EOF[0], EOF[2])
-
     }
 
     split_patt = re.compile(
@@ -151,7 +150,6 @@ class Lexer:
         re.VERBOSE
     )
 
-
     def __init__(self, fn: str):
         try:
             self.f = open(fn)
@@ -171,9 +169,9 @@ class Lexer:
             return (Lexer.REAL[0],Lexer.REAL[2]), token, line_num
         elif re.match(Lexer.COMMENT[1], token):
             return "COMMENT"
-            # return 'Comment: ' + token + ', ' + str(line_num)
         else:
-            return ("ILLEGAL", 'Unrecognized character sequence "' + token + '" at  line number: ' + str(line_num))
+            return "ILLEGAL", 'Invalid character sequence "' + token + '" on line: ' + str(line_num)
+
     def token_generator(self) -> Generator[Tuple[int, str], None, None]:
         line_count = 1
         for line in self.f:
@@ -189,8 +187,10 @@ class Lexer:
                 elif "COMMENT" == self.check_non_singletons(t, line_count):
                     pass
                 elif "ILLEGAL" == self.check_non_singletons(t, line_count)[0]:
+                    # invalid token
+                    print()
                     print(self.check_non_singletons(t, line_count)[1])
-                    # pass
+                    print()
                 else:
                     yield self.check_non_singletons(t, line_count)  # testing regex
 
@@ -205,7 +205,6 @@ if __name__ == "__main__":
 
     # generate tokens
     g = lex.token_generator()
-
 
     print("%-20s %-65s %-20s" %("Token", "Name", "Line Number"))
     print("-----------------------------------------------------------------------------------------------------")
