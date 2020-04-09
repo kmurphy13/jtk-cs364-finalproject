@@ -2,6 +2,9 @@ import sys
 from collections import namedtuple
 from typing import Generator, Tuple
 import re
+import sys
+
+
 class Lexer:
 
     # class variables that represent a code for a "kind" of token.
@@ -193,8 +196,7 @@ class Lexer:
 
 
 if __name__ == "__main__":
-
-    lex = Lexer("lexertest.sluc")  # use command line arguments
+    lex = Lexer(sys.argv[1])  # use command line arguments
 
     g = lex.token_generator()
     # print(lex.PLUS[1], lex.PLUS[0])
