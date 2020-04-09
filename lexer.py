@@ -71,8 +71,10 @@ class Lexer:
            
            (\+)   |        #  operator: plus
            (\*)   |        #  operator: times
-           (/)    |        #  operator: divide
+           (^/$)  |        #  operator: divide
            (-)    |        #  operator: subtract 
+           (<<)   |        #  operator: bitshift left
+           (>>)   |        #  operator: bitshift right
            (\|\|) |        #  operator: or
            (&&)   |        #  operator: and
            (==)   |        #  operator: equal
@@ -91,21 +93,21 @@ class Lexer:
            (\()   |        #  punctuation: left parenthesis
            (\))   |        #  punctuation: right parenthesis
            
-           (\b(print)\b)  |    # keyword: print
-           (\b(bool)\b)   |    # keyword: bool
-           (\b(else)\b)   |    # keyword: else
-           (\b(false)\b)  |    # keyword: false
-           (\b(if)\b)     |    # keyword: if
-           (\b(true)\b)   |    # keyword: true
-           (\b(while)\b)  |    # keyword: while
-           (\b(float)\b)  |    # keyword: float
-           (\b(int)\b)    |    # keyword: int
+           (\bprint\b)  |    # keyword: print
+           (\bbool\b)   |    # keyword: bool
+           (\belse\b)   |    # keyword: else
+           (\bfalse\b)  |    # keyword: false
+           (\bif\b)     |    # keyword: if
+           (\btrue\b)   |    # keyword: true
+           (\bwhile\b)  |    # keyword: while
+           (\bfloat\b)  |    # keyword: float
+           (\bint\b)    |    # keyword: int
            
-           (\d[_\d]*)     |                      # integer     TODO: Do plus/minus need to be included? Also not sure about the ^ and $ 
-           (\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*) |  # real number TODO: This currently matches integers too, but I'm thinking that it may be okay because it comes after...? 
-           ([_a-zA-Z]\w*)                     |  # identifier
-           (".*")                             |  # string      TODO: This seems too simple
-           (\/\/.*)                           |  # comment
+           (^\d[_\d]*$)                        |   # integer     TODO: Do plus/minus need to be included? Also not sure about the ^ and $ 
+           ([+-]?\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*) |   # real number TODO: This currently matches integers too, but I'm thinking that it may be okay because it comes after...? 
+           ([_a-zA-Z]\w*)                          |   # identifier
+           (".*")                                  |   # string      TODO: This seems too simple
+           (\/\/.*)                                |   # comment
         """,
         re.VERBOSE
     )
@@ -152,7 +154,9 @@ class Lexer:
                 # TODO replace with a dictionary
 
                 # if singleton_dict[t]:
-                yield(self.singleton_dict[t], t)
+                yield t
+                # yield (self.singleton_dict[t], t)
+
                 # else:
                 #     is_token_type(Lexer.ID, t)
                 #     is_token_type(Lexer.STRING, t)
@@ -163,7 +167,7 @@ class Lexer:
 
 if __name__ == "__main__":
 
-    lex = Lexer("test.sluc")  # use command line arguments
+    lex = Lexer("lexertest.sluc")  # use command line arguments
 
     g = lex.token_generator()
     # print(lex.PLUS[1], lex.PLUS[0])
