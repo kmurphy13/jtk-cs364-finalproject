@@ -10,11 +10,12 @@ class Lexer:
     # namedtuple is the id and then the regex/value
     Token = namedtuple('Token', ['id', 'value'])
 
-    # INT = Token(1, "[1-9]+")
-    # ID = Token(0, "[_a-zA-Z]\w*")
-    # REAL = Token(1, '')
-    # COMMENT = Token(3, '')
-    # STRING = Token(4, '')
+    INT = Token(0, "[1-9]+")
+    ID = Token(1, "[_a-zA-Z]\w*")
+    REAL = Token(2, '')
+    COMMENT = Token(3, '')
+    STRING = Token(4, '')
+    # TODO: Fix above ^
     PLUS = Token(5, '+')
     LPAREN = Token(6, '(')
     RPAREN = Token(7, ')')
@@ -68,7 +69,12 @@ class Lexer:
         LEQ[1]: LEQ[0],
         GT[1]: GT[0],
         GEQ[1]: GEQ[0],
-        MINUS[1]: MINUS[0] #
+        MINUS[1]: MINUS[0], #
+        BITSHIFTL[1]:BITSHIFTL[0],
+        BITSHIFTR[1]:BITSHIFTR[0],
+        COMMA[1]: COMMA[0],
+        SEMICOLON[1]:SEMICOLON[0]
+
     }
     split_patt = re.compile(
         r"""               #  Split on:
