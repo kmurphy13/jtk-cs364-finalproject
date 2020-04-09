@@ -1,5 +1,7 @@
 ;)  ( 12345    // the tokens ; ) 12345
 
+    print(kira)
+
   	fred zoo    		identifier   // three identifiers
 
     // all keywords
@@ -23,6 +25,7 @@
   	!
 
   	|| %  - * +
+
 
 
 

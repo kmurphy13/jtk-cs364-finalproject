@@ -39,6 +39,11 @@ class Lexer:
     GT = Token(26, '>')
     GEQ = Token(27, '>=')
     MINUS = Token(28, '-')
+    BITSHIFTL = (29, '<<')
+    BITSHIFTR = (30, '>>')
+    COMMA = (31, ',')
+    SEMICOLON = (32, ';')
+
 
     singleton_dict = {
         PLUS[1]: PLUS[0], #
@@ -104,14 +109,13 @@ class Lexer:
            (\bint\b)    |    # keyword: int
            
            (^\d[_\d]*$)                        |   # integer     TODO: Do plus/minus need to be included? Also not sure about the ^ and $ 
-           ([+-]?\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*) |   # real number TODO: This currently matches integers too, but I'm thinking that it may be okay because it comes after...? 
+           ([+-]?\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*) |   # real number 
            ([_a-zA-Z]\w*)                          |   # identifier
            (".*")                                  |   # string      TODO: This seems too simple
            (\/\/.*)                                |   # comment
         """,
         re.VERBOSE
     )
-
 
 
 
@@ -153,10 +157,10 @@ class Lexer:
             for t in tokens:
                 # TODO replace with a dictionary
 
-                # if singleton_dict[t]:
-                yield t
-                # yield (self.singleton_dict[t], t)
-
+                if t in self.singleton_dict:
+                    yield (self.singleton_dict[t], t)
+                else:
+                    yield t # testing regex
                 # else:
                 #     is_token_type(Lexer.ID, t)
                 #     is_token_type(Lexer.STRING, t)
