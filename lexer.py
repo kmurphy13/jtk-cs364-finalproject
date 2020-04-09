@@ -11,9 +11,9 @@ class Lexer:
     # namedtuple is the id and then the regex/value
     Token = namedtuple('Token', ['id', 'value'])
 
-    INT = Token(0, "(^\d[_\d]*$)")
+    INT = Token(0, "(?:^\d[_\d]*\d$)|^\d*$")
     ID = Token(1, "[_a-zA-Z]\w*")
-    REAL = Token(2, '\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*')
+    REAL = Token(2, '^\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*$')
     COMMENT = Token(3, '\/\/.*')
     STRING = Token(4, '".*"')
 
@@ -128,7 +128,7 @@ class Lexer:
            (\bint\b)    |    # keyword: int
            
            (^\d[_\d]*$)                            |   # integer     TODO: Do plus/minus need to be included? Also not sure about the ^ and $ 
-           (\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*)      |   # real number 
+           (\d[._\d]*(?:e[+-]?)*[._\d]*)           |   # real number 
            ([_a-zA-Z]\w*)                          |   # identifier
            (".*")                                  |   # string      TODO: This seems too simple
            (\/\/.*)                                |   # comment
