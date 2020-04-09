@@ -13,7 +13,7 @@ class Lexer:
     # namedtuple is the id and then the regex/value
     Token = namedtuple('Token', ['id', 'value'])
 
-    INT = Token(0, "^\d[_\d]*$")
+    INT = Token(0, "^\d[_\d]*\d$")
     ID = Token(1, "[_a-zA-Z]\w*")
     REAL = Token(2, '\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*\d')
     COMMENT = Token(3, '\/\/.*')
@@ -128,7 +128,7 @@ class Lexer:
            (\bfloat\b)  |    # keyword: float
            (\bint\b)    |    # keyword: int
            
-           (^\d[_\d]*$)                        |   # integer     TODO: Do plus/minus need to be included? Also not sure about the ^ and $ 
+           (\d[_\d]*)                        |   # integer     TODO: Do plus/minus need to be included? Also not sure about the ^ and $ 
            (\d[_\d]*\.?[_\d]*e?[+-]?\d[_\d]*\d)  |   # real number 
            ([_a-zA-Z]\w*)                          |   # identifier
            (".*")                                  |   # string      TODO: This seems too simple
@@ -136,8 +136,6 @@ class Lexer:
         """,
         re.VERBOSE
     )
-
-
 
     def __init__(self, fn: str):
         try:
@@ -199,7 +197,6 @@ if __name__ == "__main__":
     lex = Lexer(sys.argv[1])  # use command line arguments
 
     g = lex.token_generator()
-    # print(lex.PLUS[1], lex.PLUS[0])
     while True:
 
         try:
