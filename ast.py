@@ -86,6 +86,20 @@ class UnaryMinus(Expr):
     def eval(self):
         return -self.tree.eval()
 
+class UnaryMinus(Expr):
+    def __init__(self, tree: Expr):
+        self.tree = tree
+
+    def __str__(self):
+        return "-({0})".format(str(self.tree))
+
+    def scheme(self):
+        return "(- {0})".format(self.tree.scheme())
+
+    def eval(self):
+        return -self.tree.eval()
+
+
 
 class IDExpr(Expr):
 
@@ -101,9 +115,7 @@ class IDExpr(Expr):
     def eval(self, env):  # a + 7
         # lookup the value of self.id. Look up where?
         # env is a dictionary
-        pass
-
-
+        return env[id]
 class IntLitExpr(Expr):
 
     def __init__(self, intlit: str):
@@ -118,6 +130,22 @@ class IntLitExpr(Expr):
     def eval(self):
         return self.intlit  # base case
 
+class FloatLitExpr(Expr):
+    def __init__(self, floatlit: str):
+        self.floatlit = float(floatlit)
+
+    def __str__(self):
+        return str(self.floatlit)
+
+    def scheme(self):
+        return str(self.floatlit)
+
+    def eval(self):
+        return self.floatlit
+
+
+
+
 
 if __name__ == '__main__':
     """
@@ -126,6 +154,9 @@ if __name__ == '__main__':
     """
     expr = BinaryExpr(BinaryExpr(IntLitExpr('5'), IntLitExpr('6'), '+'),
                    BinaryExpr(IntLitExpr('9'),IntLitExpr('8'), '*'), '+')
+
     print(expr)
     print(expr.eval())
+
+
 
