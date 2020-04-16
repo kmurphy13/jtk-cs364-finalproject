@@ -4,6 +4,7 @@ An abstract syntax tree (AST) is a data structure that represents
 the concrete (text) syntax of a program
 """
 from typing import Sequence, Union
+import operator
 
 
 # Use a class hierarchy to represent types.
@@ -40,58 +41,38 @@ class Expr:
 # TODO Don't just cut-and-paste new operations, abstract!
 
 class BinaryExpr(Expr):
-    pass
-
-
-class AndExpr(Expr):
-    def __init__(self, left: Expr, right: Expr):
+    def __init__(self, left: Expr, right: Expr, op):
         self.left = left
         self.right = right
+        self.op = op
 
     def __str__(self):
-        return "({0} && {1})".format(str(self.left), str(self.right))
 
-
-class AddExpr(Expr):
-    def __init__(self, left: Expr, right: Expr):
-        self.left = left
-        self.right = right
-
-    def __str__(self):
-        return "({0} + {1})".format(str(self.left), str(self.right))
-
+        return "("  + str(self.left) + " " + self.op + " "+ str(self.right) + ")"
     def scheme(self) -> str:
-        """
-        Return a string that represents the expression in Scheme syntax.
-        e.g.,  (a + b)   -> (+ a b)
-        """
-        return "(+ {0} {1})".format(self.left.scheme(), self.right.scheme())
+
+        return "(" +self.op +  "{0} {1})".format(self.left.scheme(), self.right.scheme())
 
     def eval(self) -> Union[int, float]:
-        # TODO environment
-        return self.left.eval() + self.right.eval()
+        l = self.left.eval()
+        r = self.right.eval()
+        opdict = {
+            '+': operator.add(l,r),
+            '-': operator.sub(l,r),
+            '*': operator.mul(l, r),
+            '/': operator.truediv(l,r),
+            '%': operator.mod(l,r),
 
-
-class MultExpr(Expr):
-    def __init__(self, left: Expr, right: Expr):
-        self.left = left
-        self.right = right
-
-    def __str__(self):
-        return "({0} * {1})".format(str(self.left), str(self.right))
-
-    def scheme(self):
-        """
-        Return a string that represents the expression in Scheme syntax.
-        e.g.,  (a * b)   -> (* a b)
-        """
-        return "(* {0} {1})".format(self.left.scheme(), self.right.scheme())
-
-    def eval(self) -> Union[int, float]:
-        # TODO environment
-        return self.left.eval() * self.right.eval()
-
-
+            '<': operator.lt(l, r),
+            '<=': operator.le(l, r),
+            '==': operator.eq(l, r),
+            '!=': operator.ne(l, r),
+            '>=': operator.ge(l, r),
+            '>': operator.gt(l, r),
+            '||': operator.or_(l,r),
+            '&&': operator.add(l,r),
+        }
+        return opdict[self.op]
 class UnaryMinus(Expr):
     def __init__(self, tree: Expr):
         self.tree = tree
@@ -143,6 +124,8 @@ if __name__ == '__main__':
     Represent a + b + c * d
     ((a + b) + (c * d))
     """
-    expr = AddExpr(AddExpr(IDExpr('a'), IDExpr('b')),
-                   MultExpr(IDExpr('c'), IDExpr('d')))
+    expr = BinaryExpr(BinaryExpr(IntLitExpr('5'), IntLitExpr('6'), '+'),
+                   BinaryExpr(IntLitExpr('9'),IntLitExpr('8'), '*'), '+')
     print(expr)
+    print(expr.eval())
+
