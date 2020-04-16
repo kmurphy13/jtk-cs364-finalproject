@@ -1,8 +1,6 @@
 # jtk-cs364-finalproject
 Final Project for SLU CS364: Programming Languages.
 
-TODO: Erase things as you do them.
-
 CS 364 - Lexical Analyzer for SLU-C
 SLU-C is our simplified programming language that looks a little like C. In this assignment you are going to complete the lexical analyzer (lexer) that we began in class. You need to get the lexer working in order to do Parts II and III of the project.
 
