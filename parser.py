@@ -3,27 +3,43 @@ from ast import Expr, AddExpr, MultExpr, UnaryMinus, IDExpr, IntLitExpr
 
 """
   Program         →  { FunctionDef }
+
   FunctionDef     →  Type id ( Params ) { Declarations Statements }
+
   Params          →  Type id { , Type id } | ε
+
   Declarations    →  { Declaration }
+
   Declaration     →  Type  id  ;
+
   Type            →  int | bool | float
+
   Statements      →  { Statement }
+
   Statement       →  ; | Block | Assignment | IfStatement |     
                      WhileStatement |  PrintStmt | ReturnStmt
+
   ReturnStmt      →  return Expression ;
   Block           →  { Statements }
+
   Assignment      →  id = Expression ;
+
   IfStatement     →  if ( Expression ) Statement [ else Statement ]
-
+ 
   WhileStatement  →  while ( Expression ) Statement  
-  PrintStmt       →  print(PrintArg { , PrintArg })
-  PrintArg        →  Expression | stringlit
-  Expression      →  Conjunction { || Conjunction }
-  Conjunction     →  Equality { && Equality }
 
+  PrintStmt       →  print(PrintArg { , PrintArg })
+
+  PrintArg        →  Expression | stringlit
+
+  Expression      →  Conjunction { || Conjunction }
+
+  Conjunction     →  Equality { && Equality }
+ 
   Equality        →  Relation [ EquOp Relation ]
+
   Relation        →  Addition [ RelOp Addition ]
+
   Addition        →  Term { AddOp Term }
   Term            →  Factor { MulOp Factor }
   Factor          →  [ UnaryOp ] Primary
@@ -31,7 +47,6 @@ from ast import Expr, AddExpr, MultExpr, UnaryMinus, IDExpr, IntLitExpr
   Primary         →  id | intlit | floatlit | ( Expression )
   RelOp           →  < | <= | > | >=   AddOp           →  + | -  MulOp           →  * | / | %  EquOp           →  == | != 
 """
-
 
 class Parser:
 
@@ -46,10 +61,10 @@ class Parser:
         Term  → Fact { (* | / | %) Fact }
         Fact  → [ - ] Primary
         Primary  → ID | INTLIT | ( Expr )
-
+        
         Recursive descent parser. Each non-terminal corresponds 
         to a function.
-
+        
         -7  -(7 * 5)  -b   unary minus
     """
 
@@ -72,11 +87,11 @@ class Parser:
 
         left = self.term()
 
-        while self.currtok[0] in {Lexer.PLUS, Lexer.MINUS}:
+        while self.currtok[0] in { Lexer.PLUS, Lexer.MINUS }:
             self.currtok = next(self.tg)  # advance to the next token
-            # because we matched a +
+                                          # because we matched a +
             right = self.term()
-            left = AddExpr(left, right)
+            left = AddExpr(left,right)
 
         return left
 
@@ -86,7 +101,7 @@ class Parser:
         """
         left = self.fact()
 
-        while self.currtok[0] in {Lexer.MULT, Lexer.DIVIDE}:
+        while self.currtok[0] in { Lexer.MULT, Lexer.DIVIDE }:
             self.currtok = next(self.tg)
             right = self.fact()
             left = MultExpr(left, right)
@@ -130,7 +145,7 @@ class Parser:
         # parse a parenthesized expression
         if self.currtok[0] == Lexer.LPAREN:
             self.currtok = next(self.tg)
-            tree = self.addition()  # TODO Keeps changing!
+            tree = self.addition() # TODO Keeps changing!
             if self.currtok[0] == Lexer.RPAREN:
                 self.currtok = next(self.tg)
                 return tree
@@ -140,6 +155,7 @@ class Parser:
 
         # what if we get here we have a problem
         raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".format(self.currtok[1], -1))
+
 
 
 # create our own exception by inheriting
@@ -152,8 +168,8 @@ class SLUCSyntaxError(Exception):
     def __str__(self):
         return self.message
 
-
 if __name__ == '__main__':
+
     p = Parser('simple.c')
     t = p.addition()
     print(t)
