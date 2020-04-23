@@ -78,67 +78,74 @@ class Parser:
 
     # top-level function that will be called
     def program(self):
-        """
-            Program         →  { FunctionDef }
-        """
-        self.functionDef()
+        curr_func = self.function_def()
+        while curr_func:
+            self.function_def()
 
-    def functionDef(self):
+    def function_def(self):
         self.type()
-        if self.currtok[1] == Lexer.ID:  # using ID in expression
+        if self.currtok[1] == Lexer.ID.value:
             tmp = self.currtok
             # TODO check to make sure ID is declared (in the dictionary)
             self.next_token()
             IDExpr(tmp[1])
-            if self.currtok[1] == Lexer.LPAREN:
+            if self.currtok[1] == Lexer.LPAREN.value:
                 self.params()
                 self.next_token()
-                if self.currtok[1] == Lexer.RPAREN:
+                if self.currtok[1] == Lexer.RPAREN.value:
                     self.next_token()
-                    if self.currtok[1] == Lexer.RCBRAC:
+                    if self.currtok[1] == Lexer.RCBRAC.value:
                         self.declarations()
                         self.statements()
                         self.next_token()
-                        if self.currtok[1] == Lexer.LCBRAC:
+                        if self.currtok[1] == Lexer.LCBRAC.value:
                             self.next_token()
-
-
+        else:
+            return False
     def params(self):
         self.type()
-        if self.currtok[1] == Lexer.ID:  # using ID in expression
+        if self.currtok[1] == Lexer.value:  # using ID in expression
             tmp = self.currtok
             # TODO check to make sure ID is declared (in the dictionary)
             self.next_token()
             id = IDExpr(tmp[1])
-            if self.currtok[1] == Lexer.COMMA:
-                pass
-
 
     def declarations(self):
-        pass
+        curr_type = self.type()
+        while curr_type:
+            self.statement()
     def declaration(self):
-        pass
+        self.type()
+        if self.currtok[1] == Lexer.value:  # using ID in expression
+            tmp = self.currtok
+            # TODO check to make sure ID is declared (in the dictionary)
+            self.next_token()
+            id = IDExpr(tmp[1])
+            if self.currtok[1] == Lexer.SEMICOLON.value:
+                self.next_token()
     def type(self):
         # parse int declaration
-        if self.currtok[1] == Lexer.INTK:  # using ID in expression
+        if self.currtok[0][0] == Lexer.INTK.id:  # using ID in expression
             tmp = self.currtok
             self.next_token()
             return tmp[1]
-
         # parse bool declaration
-        if self.currtok[1] == Lexer.BOOL:
+        if self.currtok[0][0] == Lexer.BOOL.id:
             tmp = self.currtok
             self.next_token()
             return tmp[1]
 
             # parse float declaration
-        if self.currtok[1] == Lexer.FLOAT:
+        if self.currtok[0][0] == Lexer.FLOAT.id:
             tmp = self.currtok
             self.next_token()
             return tmp[1]
+        else:
+            return False
 
     def statements(self):
-        pass
+        while self.currtok[0][0] == Lexer.RCBRAC.id:
+            self.statement()
 
     def statement(self):
         # get the id of the token
@@ -262,10 +269,22 @@ class Parser:
         return left
 
     def equality(self):  # a == b      3*z != 99
-        pass
+        left = self.relation()
+        while self.currtok[0][0] in {Lexer.EQUAL.id, Lexer.NEQUAL.id}:
+            op = self.currtok[0][0]
+            self.next_token()
+            right = self.relation()
+            left = BinaryExpr(left, right, op)
+        return left
 
     def relation(self):  # a < b
-        pass
+        left = self.addition()
+        while self.currtok[0][0] in {Lexer.LT.id, Lexer.LEQ.id, Lexer.GT.id, Lexer.GEQ}:
+            op = self.currtok[0][0]
+            self.next_token()
+            right = self.addition()
+            left = BinaryExpr(left, right, op)
+        return left
 
     def addition(self) -> Expr:
         """
