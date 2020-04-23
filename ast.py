@@ -52,6 +52,28 @@ class StatementsStmt(Stmt):
         pass
 
 
+class PrintArg:
+    def __init__(self, string_lit: str):
+        self.string_lit = string_lit
+
+    def __str__(self):
+        return self.string_lit
+
+
+class PrintStmt(Stmt):
+    def __init__(self):
+        pass
+
+
+class WhileStmt(Stmt):
+    def __init__(self):
+        pass
+
+
+class AssignStmt(Stmt):
+    def __init__(self):
+        pass
+
 
 class Declaration:
     pass
@@ -110,8 +132,8 @@ class UnaryMinus(Expr):
 
 class IDExpr(Expr):
 
-    def __init__(self, id: str):
-        self.id = id
+    def __init__(self, identifier: str):
+        self.id = identifier
 
     def __str__(self):
         return self.id
@@ -124,11 +146,21 @@ class IDExpr(Expr):
         # env is a dictionary
         pass
 
-    def typeof(self, decls) -> Type:
-        # TODO type decls appropriately as a dictionary type
-        # look up the variable type in the declaration dictoinary
-        # from the function definition (FunctionDef)
-        pass
+
+class FuncIDExpr(Expr):
+    def __init__(self, identifier: str):
+        self.id = identifier
+
+    def __str__(self):
+        return self.id
+
+
+class StringLitExpr(Expr):
+    def __init__(self, string_lit: str):
+        self.string_lit = string_lit
+
+    def __str__(self):
+        return self.string_lit
 
 
 class IntLitExpr(Expr):
@@ -139,18 +171,6 @@ class IntLitExpr(Expr):
     def __str__(self):
         return str(self.intlit)
 
-    def scheme(self):
-        return str(self.intlit)
-
-    def eval(self):
-        return self.intlit   # base case
-
-    #def typeof(self) -> Type:
-    # representing SLU-C types using Python types
-    def typeof(self) -> type:
-
-        #return IntegerType
-        return int
 
 class SLUCTypeError(Exception):
     def __init__(self, message: str):
