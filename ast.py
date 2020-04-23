@@ -75,11 +75,6 @@ class AssignStmt(Stmt):
         pass
 
 
-class DeclarationStmt(Stmt):
-    def __init__(self):
-        pass
-
-
 class Program:
 
     def __init__(self, funcs: Sequence[FunctionDef]):
@@ -131,6 +126,11 @@ class UnaryMinus(Expr):
         return -self.tree.eval()
 
 
+class DeclarationExpr(Expr):
+    def __init__(self):
+        pass
+    
+
 class IDExpr(Expr):
 
     def __init__(self, identifier: str):
@@ -165,7 +165,6 @@ class StringLitExpr(Expr):
 
 
 class IntLitExpr(Expr):
-
     def __init__(self, intlit: str):
         self.intlit = int(intlit)
 
