@@ -1,4 +1,4 @@
-from typing import Sequence, Union, Optional
+from typing import Sequence, Union, Optional, List, Tuple
 import operator
 
 
@@ -27,8 +27,8 @@ class IfStmt(Stmt):
 
 
 class StatementsStmt(Stmt):
-    def __init__(self):
-        pass
+    def __init__(self, statement_list: List[Stmt]):
+        self.statement_list = statement_list
 
 
 class PrintArg:
@@ -105,9 +105,22 @@ class UnaryMinus(Expr):
         return -self.tree.eval()
 
 
+class DeclarationExpr(Expr):
+    def __init__(self, dec_type, dec_id):
+        self.type = dec_type
+        self.id = dec_id
+
+    def __str__(self):
+        return self.type + ' ' + self.id + ';'
+
+
 class DeclarationsExpr(Expr):
-    def __init__(self):
-        pass
+    def __init__(self, dec_list: List[DeclarationExpr]):
+        self.dec_list = dec_list
+
+    def __str__(self):
+        for dec in self.dec_list:
+            return dec
 
 
 class IDExpr(Expr):
@@ -152,7 +165,7 @@ class IntLitExpr(Expr):
 
 
 class FunctionDef:
-    def __init__(self, type: str, id: IDExpr, params: Params, decls: DeclarationsExpr, stmts: StatementsStmt):
+    def __init__(self, type: str, id: IDExpr, params: List[Tuple[str, str]], decls: DeclarationsExpr, stmts: StatementsStmt):
         self.type = type
         self.id = id
         self.params = params

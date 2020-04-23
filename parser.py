@@ -1,5 +1,5 @@
 from lexer import Lexer
-from ast import Expr, UnaryMinus, IDExpr, IntLitExpr, BinaryExpr
+from ast import *
 
 
 class Parser:
@@ -20,48 +20,55 @@ class Parser:
             self.function_def()
 
     def function_def(self):
-        self.type()
-        if self.curr_token[1] == Lexer.ID.value:
+        func_type = self.type()
+        if self.curr_token[0][0] == Lexer.ID.id:
             tmp = self.curr_token
             # TODO check to make sure ID is declared (in the dictionary)
+            func_id = IDExpr(tmp[1])
             self.next_token()
-            IDExpr(tmp[1])
             if self.curr_token[1] == Lexer.LPAREN.value:
-                self.params()
                 self.next_token()
+                func_params = self.params()
                 if self.curr_token[1] == Lexer.RPAREN.value:
                     self.next_token()
                     if self.curr_token[1] == Lexer.RCBRAC.value:
-                        self.declarations()
-                        self.statements()
                         self.next_token()
+                        func_decls = self.declarations()
+                        func_stmts = self.statements()
                         if self.curr_token[1] == Lexer.LCBRAC.value:
+                            FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
                             self.next_token()
         else:
             return False
 
     def params(self):
         self.type()
-        if self.curr_token[1] == Lexer.value:  # using ID in expression
+        if self.curr_token[0][0] == Lexer.ID.id:  # using ID in expression
             tmp = self.curr_token
             # TODO check to make sure ID is declared (in the dictionary)
             self.next_token()
             id = IDExpr(tmp[1])
 
     def declarations(self):
-        curr_type = self.type()
-        while curr_type:
-            self.statement()
+        declaration_list = []
+        curr_dec = self.declaration()
+        while curr_dec:
+            declaration_list.append(curr_dec)
+            curr_dec = self.declaration()
+        return DeclarationsExpr(declaration_list)
 
     def declaration(self):
-        self.type()
-        if self.curr_token[1] == Lexer.value:  # using ID in expression
+        dec_type = self.type()
+        if self.curr_token[0][0] == Lexer.ID.id:  # using ID in expression
             tmp = self.curr_token
             # TODO check to make sure ID is declared (in the dictionary)
             self.next_token()
             id = IDExpr(tmp[1])
             if self.curr_token[1] == Lexer.SEMICOLON.value:
                 self.next_token()
+                return DeclarationExpr(dec_type, id)
+
+        return False
 
     def type(self):
         # parse int declaration
@@ -84,8 +91,10 @@ class Parser:
             return False
 
     def statements(self):
-        while self.curr_token[0][0] == Lexer.RCBRAC.id:
-            self.statement()
+        statement_list = []
+        while self.curr_token[0][0] != Lexer.RCBRAC.id:
+            statement_list.append(self.statement())
+        return StatementsStmt(statement_list)
 
     def statement(self):
         # get the id of the token
