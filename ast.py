@@ -26,9 +26,13 @@ class IfStmt(Stmt):
             self.falsepart.eval(env)
 
 
-class StatementsStmt(Stmt):
+class StatementsStmt:
     def __init__(self, statement_list: List[Stmt]):
         self.statement_list = statement_list
+
+    def __str__(self):
+        for stmt in self.statement_list:
+            return stmt
 
 
 class PrintArg:
