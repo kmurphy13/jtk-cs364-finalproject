@@ -76,6 +76,55 @@ class Parser:
         """
             Program         →  { FunctionDef }
         """
+        left = self.functionDef()
+
+    def functionDef(self):
+
+        if self.currtok[0] == Lexer.LPAREN:
+            self.currtok = next(self.tg)
+
+        pass
+    def params(self):
+        pass
+    def declarations(self):
+        pass
+    def declaration(self):
+        pass
+    def type(self):
+        pass
+    def statements(self):
+        pass
+    def statment(self):
+        pass
+
+    def return_stmt(self):
+        pass
+
+    def block(self):
+        pass
+
+    def assignment(self):
+        pass
+
+    def if_stmt(self):
+        pass
+    def while_statement(self):
+        pass
+
+    def print_statement(self):
+        pass
+
+    def print_arg(self):
+        pass
+
+    def expression(self):
+        pass
+
+    def conjunction(self):
+        pass
+
+    def conjuction(self):
+        pass
 
     def equality(self):  # a == b      3*z != 99
         pass
