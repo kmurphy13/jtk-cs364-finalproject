@@ -10,27 +10,6 @@ class Expr:
     pass
 
 
-class FunctionDef:
-    def __init__(self, t: str, id: IDExpr, params: Params, decls: DeclarationsExpr, stmts: StatementsStmt):
-        # provide type hints for all of the parameters
-        # Decls should be a dictionary
-        # Key: id
-        # Value: Type
-        pass
-
-    def __str__(self):
-        pass
-
-    def eval(self) -> Union[int, float, bool]:
-        # an environment maps identifiers to values
-        # parameters or local variables
-        # to evaluate a function you evaluate all of the statements
-        # within the environment
-        env = {}   # TODO Fix this
-        for s in self.stmts:
-            s.eval(env)  # TODO define environment
-
-
 class Stmt:
     pass
 
@@ -126,10 +105,10 @@ class UnaryMinus(Expr):
         return -self.tree.eval()
 
 
-class DeclarationExpr(Expr):
+class DeclarationsExpr(Expr):
     def __init__(self):
         pass
-    
+
 
 class IDExpr(Expr):
 
@@ -170,6 +149,27 @@ class IntLitExpr(Expr):
 
     def __str__(self):
         return str(self.intlit)
+
+
+class FunctionDef:
+    def __init__(self, type: str, id: IDExpr, params: Params, decls: DeclarationsExpr, stmts: StatementsStmt):
+        self.type = type
+        self.id = id
+        self.params = params
+        self.decls = decls
+        self.stmts = stmts
+
+    def __str__(self):
+        return "{0} {1}({2}){ \n {3} \n {4} \n }".format(self.type, self.id, self.params, self.decls, self.stmts)
+
+    # def eval(self) -> Union[int, float, bool]:
+    #     # an environment maps identifiers to values
+    #     # parameters or local variables
+    #     # to evaluate a function you evaluate all of the statements
+    #     # within the environment
+    #     env = {}   # TODO Fix this
+    #     for s in self.stmts:
+    #         s.eval(env)  # TODO define environment
 
 
 class SLUCTypeError(Exception):
