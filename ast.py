@@ -11,28 +11,29 @@ class Expr:
 
 
 class Stmt:
-    pass
+    def __str__(self):
+        return self
+
+
+class Statements:
+    def __init__(self, statement_list: List[Stmt]):
+        self.statement_list = statement_list
+
+    def __str__(self):
+        for stmt in self.statement_list:
+            return str(stmt)
 
 
 class IfStmt(Stmt):
     def __init__(self, cond: Expr, truepart: Stmt, falsepart : Optional[Stmt]):
         pass
 
-    def eval(self, env):
-
-        if self.cond.eval():
-            self.truepart.eval(env)
-        elif self.falsepart is not None:
-            self.falsepart.eval(env)
-
-
-class StatementsStmt:
-    def __init__(self, statement_list: List[Stmt]):
-        self.statement_list = statement_list
-
-    def __str__(self):
-        for stmt in self.statement_list:
-            return stmt
+    # def eval(self, env):
+    #
+    #     if self.cond.eval():
+    #         self.truepart.eval(env)
+    #     elif self.falsepart is not None:
+    #         self.falsepart.eval(env)
 
 
 class PrintArg:
@@ -102,17 +103,30 @@ class UnaryMinus(Expr):
     def eval(self):
         return -self.tree.eval()
 
-class ParamsExpr(Expr):
-    def __init__(self, params_list):
-        self.params = params_list
+
+class ParamExpr(Expr):
+    def __init__(self, param_type, param_id):
+        self.param_type = param_type
+        self.param_id = param_id
+
     def __str__(self):
-        for param in self.params:
-            return ',' + param[0] + ' ' + param[1]
+        return self.param_type + ' ' + self.param_id
 
 
+class Params:
+    def __init__(self, params_list: List[ParamExpr]):
+        self.params = params_list
+
+    def __str__(self):
+        output = ''
+        if self.params:
+            output += str(self.params[0])
+            for param in self.params[1:]:
+                output += (', ' + str(param))
+        return output
 
 
-class DeclarationExpr(Expr):
+class DeclarationExpr:
     def __init__(self, dec_type, dec_id):
         self.type = dec_type
         self.id = dec_id
@@ -121,7 +135,7 @@ class DeclarationExpr(Expr):
         return self.type + ' ' + self.id + ';'
 
 
-class DeclarationsExpr(Expr):
+class Declarations:
     def __init__(self, dec_list: List[DeclarationExpr]):
         self.dec_list = dec_list
 
@@ -172,15 +186,17 @@ class IntLitExpr(Expr):
 
 
 class FunctionDef:
-    def __init__(self, type: str, id: IDExpr, params: List[Tuple[str, str]], decls: DeclarationsExpr, stmts: StatementsStmt):
-        self.type = type
-        self.id = id
+    def __init__(self, func_type: str, func_id: IDExpr, params: Params, decls: Declarations, stmts: Statements):
+        self.func_type = func_type
+        self.func_id = func_id
         self.params = params
         self.decls = decls
         self.stmts = stmts
 
     def __str__(self):
-        return "{0} {1}({2}){ \n {3} \n {4} \n }".format(self.type, self.id, self.params, self.decls, self.stmts)
+        return "{0} {1}({2}){ \n {3} \n {4} \n }".format(
+            self.func_type, self.func_id, self.params, self.decls, self.stmts
+        )
 
     # def eval(self) -> Union[int, float, bool]:
     #     # an environment maps identifiers to values
@@ -208,6 +224,7 @@ class SLUCTypeError(Exception):
 
     def __str__(self):
         return self.message
+
 
 if __name__ == '__main__':
     """

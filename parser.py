@@ -28,10 +28,7 @@ class Parser:
             self.next_token()
             if self.curr_token[1] == Lexer.LPAREN.value:
                 self.next_token()
-                if self.curr_token[1] == Lexer.RPAREN.value:
-                    func_params = self.params(True)
-                else:
-                    func_params = self.params(False)
+                func_params = self.params()
                 if self.curr_token[1] == Lexer.RPAREN.value:
                     self.next_token()
                     if self.curr_token[1] == Lexer.RCBRAC.value:
@@ -44,19 +41,18 @@ class Parser:
         else:
             return False
 
-    def params(self, isEmpty):
-        if isEmpty:
-            return
-        else:
-            params_list = []
-            while self.curr_token[1] != Lexer.RPAREN.value:
-                param_type = self.type()
-                if self.curr_token[0][0] == Lexer.ID.id:  # using ID in expression
-                    tmp = self.curr_token
-                    # TODO check to make sure ID is declared (in the dictionary)
-                    self.next_token()
-                    param_id = IDExpr(tmp[1])
-                    params_list.append((param_type, param_id))
+    def params(self):
+        params_list = []
+        while self.curr_token[1] != Lexer.RPAREN.value:
+            param_type = self.type()
+            if self.curr_token[0][0] == Lexer.ID.id:  # using ID in expression
+                tmp = self.curr_token
+                # TODO check to make sure ID is declared (in the dictionary)
+                self.next_token()
+                param_id = IDExpr(tmp[1])
+                params_list.append(ParamExpr(param_type, param_id))
+
+        return params_list
 
 
     def declarations(self):
