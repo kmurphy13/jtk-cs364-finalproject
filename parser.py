@@ -1,57 +1,6 @@
 from lexer import Lexer
-
 from ast import Expr, UnaryMinus, IDExpr, IntLitExpr, BinaryExpr
 
-
-"""
-  Program         →  { FunctionDef }
-
-  FunctionDef     →  Type id ( Params ) { Declarations Statements }
-
-  Params          →  Type id { , Type id } | ε
-
-  Declarations    →  { Declaration }
-
-  Declaration     →  Type  id  ;
-
-  Type            →  int | bool | float
-
-  Statements      →  { Statement }
-
-  Statement       →  ; | Block | Assignment | IfStatement |     
-                     WhileStatement |  PrintStmt | ReturnStmt
-
-  ReturnStmt      →  return Expression ;
-  Block           →  { Statements }
-
-  Assignment      →  id = Expression ;
-
-  IfStatement     →  if ( Expression ) Statement [ else Statement ]
- 
-  WhileStatement  →  while ( Expression ) Statement  
-
-  PrintStmt       →  print(PrintArg { , PrintArg })
-
-  PrintArg        →  Expression | stringlit
-
-  Expression      →  Conjunction { || Conjunction }
-
-  Conjunction     →  Equality { && Equality }
- 
-  Equality        →  Relation [ EquOp Relation ]
-
-  Relation        →  Addition [ RelOp Addition ]
-
-  Addition        →  Term { AddOp Term }
-  Term            →  Factor { MulOp Factor }
-  Factor          →  [ UnaryOp ] Primary
-  UnaryOp         →  - | !
-  Primary         →  id | intlit | floatlit | ( Expression )
-  RelOp           →  < | <= | > | >=   
-  AddOp           →  + | -  
-  MulOp           →  * | / | %  
-  EquOp           →  == | != 
-"""
 
 class Parser:
 
@@ -90,6 +39,7 @@ class Parser:
                             self.next_token()
         else:
             return False
+
     def params(self):
         self.type()
         if self.curr_token[1] == Lexer.value:  # using ID in expression
@@ -102,6 +52,7 @@ class Parser:
         curr_type = self.type()
         while curr_type:
             self.statement()
+
     def declaration(self):
         self.type()
         if self.curr_token[1] == Lexer.value:  # using ID in expression
@@ -111,6 +62,7 @@ class Parser:
             id = IDExpr(tmp[1])
             if self.curr_token[1] == Lexer.SEMICOLON.value:
                 self.next_token()
+
     def type(self):
         # parse int declaration
         if self.curr_token[0][0] == Lexer.INTK.id:  # using ID in expression
@@ -198,7 +150,6 @@ class Parser:
                     raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.curr_token[2]))
         raise SLUCSyntaxError("ERROR: Invalid if statement on line {0}".format(self.curr_token[2]))
 
-
     def while_statement(self):
         if self.curr_token[0][0] == Lexer.WHILE.id:
             self.next_token()
@@ -282,9 +233,8 @@ class Parser:
 
         while self.curr_token[0][0] in { Lexer.PLUS.id, Lexer.MINUS.id }:
             self.next_token()  # advance to the next token
-                                          # because we matched a +
             right = self.term()
-            left = BinaryExpr(left,right, '+')
+            left = BinaryExpr(left, right, '+')
 
         return left
 
@@ -345,8 +295,6 @@ class Parser:
         raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".format(self.curr_token[1], -1))
 
 
-
-# create our own exception by inheriting
 # from Python's exception
 class SLUCSyntaxError(Exception):
     def __init__(self, message: str):
@@ -356,8 +304,8 @@ class SLUCSyntaxError(Exception):
     def __str__(self):
         return self.message
 
-if __name__ == '__main__':
 
+if __name__ == '__main__':
     p = Parser('simple.c')
     t = p.addition()
     print(t)
