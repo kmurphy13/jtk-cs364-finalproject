@@ -110,6 +110,14 @@ class Statements:
             return str(stmt)
 
 
+class Block(Stmt):
+    def __init__(self, stmts: Statements):
+        self.stmts = stmts
+
+    def __str__(self):
+        return "{\n\t" + str(self.stmts) + "\n}"
+
+
 class IfStmt(Stmt):
     def __init__(self, cond: Expr, true_part: Stmt, false_part: Optional[Stmt]):
         self.cond = cond
@@ -145,7 +153,7 @@ class WhileStmt(Stmt):
         self.statement = while_statement
 
     def __str__(self):
-        return 'while (' + str(self.expr) + ') ' + str(self.statement)
+        return 'while ' + str(self.expr) + ' ' + str(self.statement)
 
 class AssignStmt(Stmt):
     def __init__(self,assign_id: IDExpr, assign_expression: Expr):
@@ -244,9 +252,9 @@ if __name__ == '__main__':
     Represent a + b + c * d
     ((a + b) + (c * d))
     """
-    #statement = Statements([AssignStmt()])
+    statement = Statements([WhileStmt(BinaryExpr(IDExpr("a"),IDExpr("b"),"<"),Block(Statements([AssignStmt(IDExpr("a"),BinaryExpr(IDExpr("a"),IDExpr("b"),"+"))])))])
     declarations = Declarations([DeclarationExpr('int', 'b'), DeclarationExpr('bool', 'c')])
 
     # expr = Program(Sequence[FunctionDef('bool', IDExpr('a_function'), Params([ParamExpr('int', 'a')]),
     #                                     Declarations([DeclarationExpr('int', 'b')]), Statements([AssignStmt()]))])
-    print(declarations)
+    print(statement)

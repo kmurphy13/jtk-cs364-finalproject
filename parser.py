@@ -100,7 +100,7 @@ class Parser:
         statement_list = []
         while self.curr_token[0][0] != Lexer.RCBRAC.id:
             statement_list.append(self.statement())
-        return StatementsStmt(statement_list)
+        return Statements(statement_list)
 
     def statement(self):
         # get the id of the token
@@ -134,7 +134,7 @@ class Parser:
 
     def block(self):
         self.next_token()
-        self.statements()
+        Block(self.statements())
         if self.curr_token[1] == Lexer.RCBRAC.value:
             self.next_token()
 
