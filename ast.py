@@ -140,8 +140,10 @@ class Declarations:
         self.dec_list = dec_list
 
     def __str__(self):
+        output = ''
         for dec in self.dec_list:
-            return dec
+            output += str(dec) + '\n'
+        return output
 
 
 class IDExpr(Expr):
@@ -231,7 +233,10 @@ if __name__ == '__main__':
     Represent a + b + c * d
     ((a + b) + (c * d))
     """
-    expr = BinaryExpr(BinaryExpr(IntLitExpr('5'), IntLitExpr('6'), '+'),
-                      BinaryExpr(IntLitExpr('9'), IntLitExpr('8'), '*'), '+')
-    print(expr)
-    print(expr.eval())
+    statement = Statements([AssignStmt()])
+    declarations = Declarations([DeclarationExpr('int', 'b'), DeclarationExpr('bool', 'c')])
+
+
+    # expr = Program(Sequence[FunctionDef('bool', IDExpr('a_function'), Params([ParamExpr('int', 'a')]),
+    #                                     Declarations([DeclarationExpr('int', 'b')]), Statements([AssignStmt()]))])
+    print(declarations)
