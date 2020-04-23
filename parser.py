@@ -1,5 +1,5 @@
 from lexer import Lexer
-from ast import Expr, AddExpr, MultExpr, UnaryMinus, IDExpr, IntLitExpr
+from ast import Expr, AddExpr, MultExpr, UnaryMinus, IDExpr, IntLitExpr, BinaryExpr
 
 """
   Program         →  { FunctionDef }
@@ -108,23 +108,63 @@ class Parser:
 
     def if_stmt(self):
         pass
+
+
     def while_statement(self):
-        pass
+        if self.currtok[1] == Lexer.WHILE:
+            self.currtok = next(self.tg)
+        if self.currtok[1] == Lexer.LPAREN:
+            self.currtok = next(self.tg)
+            self.expression()
+            if self.currtok[1] == Lexer.RPAREN:
+                self.currtok = next(self.tg)
+                self.statements()
+                # self.currtok = next(self.tg) TODO: does this go here?
+            else:
+                raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.currtok[2]))
+        else:
+            raise SLUCSyntaxError("ERROR: Missing left paren on line {0}".format(self.currtok[2]))
 
     def print_statement(self):
-        pass
+        if self.currtok[1] == Lexer.PRINT:
+            self.currtok = next(self.tg)
+        if self.currtok[1] == Lexer.LPAREN:
+            self.currtok = next(self.tg)
+            self.print_arg()
+            self.currtok = next(self.tg)
+            while self.currtok[1] in { Lexer.COMMA}:
+                self.currtok = next(self.tg)
+                self.print_arg()
+            if self.currtok[1] == Lexer.RPAREN:
+                self.currtok = next(self.tg)
+            else:
+                raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.currtok[2]))
+        else:
+            raise SLUCSyntaxError("ERROR: Missing left paren on line {0}".format(self.currtok[2]))
 
     def print_arg(self):
-        pass
+        if self.currtok[1] == Lexer.STRING:
+            pass
+            # return string_lit_expr(self.currtok[1]) ????
+        else:
+            self.expression()
+            self.currtok = next(self.tg)
 
     def expression(self):
-        pass
+        left = self.conjunction()
+        while self.currtok[0] in {Lexer.LOR}:
+            self.currtok = next(self.tg)
+            right = self.conjunction()
+            left = BinaryExpr(left, right, "||")
+        return left
 
     def conjunction(self):
-        pass
-
-    def conjuction(self):
-        pass
+        left = self.equality()
+        while self.currtok[0] in {Lexer.LAND}:
+            self.currtok = next(self.tg)
+            right = self.equality()
+            left = BinaryExpr(left, right, "&&")
+        return left
 
     def equality(self):  # a == b      3*z != 99
         pass
