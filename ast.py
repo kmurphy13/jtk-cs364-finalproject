@@ -75,8 +75,9 @@ class AssignStmt(Stmt):
         pass
 
 
-class Declaration:
-    pass
+class DeclarationStmt(Stmt):
+    def __init__(self):
+        pass
 
 
 class Program:
