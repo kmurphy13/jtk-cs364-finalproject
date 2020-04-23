@@ -15,6 +15,7 @@ design patterns - catalog of best practices in software design
 
 """
 from typing import Sequence, Union, Optional
+import operator
 
 # Use a class hierarchy to represent types.
 class Expr:
@@ -84,7 +85,34 @@ class Program:
 # TODO Don't just cut-and-paste new operations, abstract!
 
 class BinaryExpr(Expr):
-    pass
+    def __init__(self, left: Expr, right: Expr, op):
+        self.left = left
+        self.right = right
+        self.op = op
+
+    def __str__(self):
+        return "(" + str(self.left) + " " + self.op + " " + str(self.right) + ")"
+
+    def eval(self) -> Union[int, float]:
+        l = self.left.eval()
+        r = self.right.eval()
+        opdict = {
+            '+': operator.add(l, r),
+            '-': operator.sub(l, r),
+            '*': operator.mul(l, r),
+            '/': operator.truediv(l, r),
+            '%': operator.mod(l, r),
+
+            '<': operator.lt(l, r),
+            '<=': operator.le(l, r),
+            '==': operator.eq(l, r),
+            '!=': operator.ne(l, r),
+            '>=': operator.ge(l, r),
+            '>': operator.gt(l, r),
+            '||': operator.or_(l, r),
+            '&&': operator.add(l, r),
+        }
+        return opdict[self.op]
 
 class AndExpr(Expr):
     def __init__(self, left: Expr, right: Expr):
@@ -237,6 +265,7 @@ if __name__ == '__main__':
     Represent a + b + c * d
     ((a + b) + (c * d))
     """
-    expr = AddExpr(AddExpr(IDExpr('a'), IDExpr('b')),
-                   MultExpr(IDExpr('c'), IDExpr('d')))
+    expr = BinaryExpr(BinaryExpr(IntLitExpr('5'), IntLitExpr('6'), '+'),
+                      BinaryExpr(IntLitExpr('9'), IntLitExpr('8'), '*'), '+')
     print(expr)
+    print(expr.eval())

@@ -45,7 +45,10 @@ from ast import Expr, AddExpr, MultExpr, UnaryMinus, IDExpr, IntLitExpr
   Factor          →  [ UnaryOp ] Primary
   UnaryOp         →  - | !
   Primary         →  id | intlit | floatlit | ( Expression )
-  RelOp           →  < | <= | > | >=   AddOp           →  + | -  MulOp           →  * | / | %  EquOp           →  == | != 
+  RelOp           →  < | <= | > | >=   
+  AddOp           →  + | -  
+  MulOp           →  * | / | %  
+  EquOp           →  == | != 
 """
 
 class Parser:
