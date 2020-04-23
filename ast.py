@@ -54,12 +54,6 @@ class AssignStmt(Stmt):
         pass
 
 
-class Program:
-
-    def __init__(self, funcs: Sequence[FunctionDef]):
-        self.funcs = funcs
-
-
 class BinaryExpr(Expr):
     def __init__(self, left: Expr, right: Expr, op):
         self.left = left
@@ -183,6 +177,15 @@ class FunctionDef:
     #     env = {}   # TODO Fix this
     #     for s in self.stmts:
     #         s.eval(env)  # TODO define environment
+
+
+class Program:
+    def __init__(self, funcs: Sequence[FunctionDef]):
+        self.funcs = funcs
+
+    def __str__(self):
+        for func in self.funcs:
+            return func
 
 
 class SLUCTypeError(Exception):
