@@ -10,33 +10,46 @@ class Expr:
     pass
 
 
-class Stmt:
-    def __str__(self):
-        return self
-
-
-class Statements:
-    def __init__(self, statement_list: List[Stmt]):
-        self.statement_list = statement_list
+class UnaryMinus(Expr):
+    def __init__(self, tree: Expr):
+        self.tree = tree
 
     def __str__(self):
-        for stmt in self.statement_list:
-            return str(stmt)
+        return "-({0})".format(str(self.tree))
+
+    def scheme(self):
+        return "(- {0})".format(self.tree.scheme())
+
+    def eval(self):
+        return -self.tree.eval()
 
 
-class IfStmt(Stmt):
-    def __init__(self, cond: Expr, truepart: Stmt, falsepart : Optional[Stmt]):
+class IDExpr(Expr):
+
+    def __init__(self, identifier: str):
+        self.id = identifier
+
+    def __str__(self):
+        return self.id
+
+    def scheme(self):
+        return self.id
+
+    def eval(self, env):  # a + 7
+        # lookup the value of self.id. Look up where?
+        # env is a dictionary
         pass
 
-    # def eval(self, env):
-    #
-    #     if self.cond.eval():
-    #         self.truepart.eval(env)
-    #     elif self.falsepart is not None:
-    #         self.falsepart.eval(env)
+
+class FuncIDExpr(Expr):
+    def __init__(self, identifier: str):
+        self.id = identifier
+
+    def __str__(self):
+        return self.id
 
 
-class PrintArg:
+class StringLitExpr(Expr):
     def __init__(self, string_lit: str):
         self.string_lit = string_lit
 
@@ -44,19 +57,12 @@ class PrintArg:
         return self.string_lit
 
 
-class PrintStmt(Stmt):
-    def __init__(self):
-        pass
+class IntLitExpr(Expr):
+    def __init__(self, intlit: str):
+        self.intlit = int(intlit)
 
-
-class WhileStmt(Stmt):
-    def __init__(self):
-        pass
-
-
-class AssignStmt(Stmt):
-    def __init__(self):
-        pass
+    def __str__(self):
+        return str(self.intlit)
 
 
 class BinaryExpr(Expr):
@@ -90,18 +96,64 @@ class BinaryExpr(Expr):
         return opdict[self.op]
 
 
-class UnaryMinus(Expr):
-    def __init__(self, tree: Expr):
-        self.tree = tree
+class Stmt:
+    def __str__(self):
+        return self
+
+
+class Statements:
+    def __init__(self, statement_list: List[Stmt]):
+        self.statement_list = statement_list
 
     def __str__(self):
-        return "-({0})".format(str(self.tree))
+        for stmt in self.statement_list:
+            return str(stmt)
 
-    def scheme(self):
-        return "(- {0})".format(self.tree.scheme())
 
-    def eval(self):
-        return -self.tree.eval()
+class IfStmt(Stmt):
+    def __init__(self, cond: Expr, true_part: Stmt, false_part: Optional[Stmt]):
+        self.cond = cond
+        self.true_part = true_part
+        self.false_part = false_part
+
+    def __str__(self):
+        return 'if ( ' + str(self.cond) + ' )' + str(self.true_part) + \
+               (' else' if self.false_part else '') + str(self.false_part)
+    # def eval(self, env):
+    #
+    #     if self.cond.eval():
+    #         self.truepart.eval(env)
+    #     elif self.falsepart is not None:
+    #         self.falsepart.eval(env)
+
+
+class PrintStmt(Stmt):
+    def __init__(self, print_args: List[Union[Expr, StringLitExpr]]):
+        self.print_args = print_args
+
+    def __str__(self):
+        output = "print("
+        for arg in self.print_args:
+            output += (str(arg) + ",")
+        output += ")"
+        return output
+
+
+class WhileStmt(Stmt):
+    def __init__(self, while_expr: Expr, while_statement: Stmt):
+        self.expr = while_expr
+        self.statement = while_statement
+
+    def __str__(self):
+        return 'while (' + self.expr + ') ' + self.statement
+
+class AssignStmt(Stmt):
+    def __init__(self,assign_id: IDExpr, assign_expression: Expr):
+        self.assign_id = assign_id
+        self.assign_expression = assign_expression
+
+    def __str__(self):
+        return str(self.assign_id) + "=" + str(self.assign_expression) + ";"
 
 
 class ParamExpr(Expr):
@@ -144,47 +196,6 @@ class Declarations:
         for dec in self.dec_list:
             output += str(dec) + '\n'
         return output
-
-
-class IDExpr(Expr):
-
-    def __init__(self, identifier: str):
-        self.id = identifier
-
-    def __str__(self):
-        return self.id
-
-    def scheme(self):
-        return self.id
-
-    def eval(self, env):  # a + 7
-        # lookup the value of self.id. Look up where?
-        # env is a dictionary
-        pass
-
-
-class FuncIDExpr(Expr):
-    def __init__(self, identifier: str):
-        self.id = identifier
-
-    def __str__(self):
-        return self.id
-
-
-class StringLitExpr(Expr):
-    def __init__(self, string_lit: str):
-        self.string_lit = string_lit
-
-    def __str__(self):
-        return self.string_lit
-
-
-class IntLitExpr(Expr):
-    def __init__(self, intlit: str):
-        self.intlit = int(intlit)
-
-    def __str__(self):
-        return str(self.intlit)
 
 
 class FunctionDef:
@@ -233,9 +244,8 @@ if __name__ == '__main__':
     Represent a + b + c * d
     ((a + b) + (c * d))
     """
-    statement = Statements([AssignStmt()])
+    #statement = Statements([AssignStmt()])
     declarations = Declarations([DeclarationExpr('int', 'b'), DeclarationExpr('bool', 'c')])
-
 
     # expr = Program(Sequence[FunctionDef('bool', IDExpr('a_function'), Params([ParamExpr('int', 'a')]),
     #                                     Declarations([DeclarationExpr('int', 'b')]), Statements([AssignStmt()]))])
