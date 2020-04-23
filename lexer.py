@@ -211,7 +211,7 @@ if __name__ == "__main__":
         try:
             p = next(g)
             print("%-20s %-65s %-20i" %(p[0][1], p[1], p[2]))
-
+            print(p)
         except StopIteration:
             print("Done")
             break

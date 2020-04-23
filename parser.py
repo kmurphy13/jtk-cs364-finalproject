@@ -1,5 +1,5 @@
 from lexer import Lexer
-from ast import Expr, AddExpr, MultExpr, UnaryMinus, IDExpr, IntLitExpr
+from ast import Expr, UnaryMinus, IDExpr, IntLitExpr, BinaryExpr
 
 """
   Program         →  { FunctionDef }
@@ -76,24 +76,64 @@ class Parser:
         """
             Program         →  { FunctionDef }
         """
-        left = self.functionDef()
+        self.functionDef()
 
     def functionDef(self):
-
-        if self.currtok[0] == Lexer.LPAREN:
+        self.type()
+        if self.currtok[1] == Lexer.ID:  # using ID in expression
+            tmp = self.currtok
+            # TODO check to make sure ID is declared (in the dictionary)
             self.currtok = next(self.tg)
+            IDExpr(tmp[1])
+            if self.currtok[1] == Lexer.LPAREN:
+                self.params()
+                self.currtok = next(self.tg)
+                if self.currtok[1] == Lexer.RPAREN:
+                    self.currtok = next(self.tg)
+                    if self.currtok[1] == Lexer.RCBRAC:
+                        self.declarations()
+                        self.statements()
+                        self.currtok = next(self.tg)
+                        if self.currtok[1] == Lexer.LCBRAC:
+                            self.currtok = next(self.tg)
 
-        pass
+
     def params(self):
-        pass
+        self.type()
+        if self.currtok[1] == Lexer.ID:  # using ID in expression
+            tmp = self.currtok
+            # TODO check to make sure ID is declared (in the dictionary)
+            self.currtok = next(self.tg)
+            id = IDExpr(tmp[1])
+            if self.currtok[1] == Lexer.COMMA:
+
+
+
     def declarations(self):
         pass
     def declaration(self):
         pass
     def type(self):
-        pass
+        # parse int declaration
+        if self.currtok[1] == Lexer.INTK:  # using ID in expression
+            tmp = self.currtok
+            self.currtok = next(self.tg)
+            return tmp[1]
+
+        # parse bool declaration
+        if self.currtok[1] == Lexer.BOOL:
+            tmp = self.currtok
+            self.currtok = next(self.tg)
+            return tmp[1]
+
+            # parse float declaration
+        if self.currtok[1] == Lexer.FLOAT:
+            tmp = self.currtok
+            self.currtok = next(self.tg)
+            return tmp[1]
+
     def statements(self):
-        pass
+        
     def statment(self):
         pass
 
@@ -134,16 +174,16 @@ class Parser:
 
     def addition(self) -> Expr:
         """
-        Expr  →  Term { + Term }
+        Term  →  Term { + Term }
         """
 
         left = self.term()
 
-        while self.currtok[0] in { Lexer.PLUS, Lexer.MINUS }:
+        while self.currtok[1] in { Lexer.PLUS, Lexer.MINUS }:
             self.currtok = next(self.tg)  # advance to the next token
                                           # because we matched a +
             right = self.term()
-            left = AddExpr(left,right)
+            left = BinaryExpr(left,right, '+')
 
         return left
 
@@ -153,10 +193,10 @@ class Parser:
         """
         left = self.fact()
 
-        while self.currtok[0] in { Lexer.MULT, Lexer.DIVIDE }:
+        while self.currtok[1] in { Lexer.MULT, Lexer.DIVIDE }:
             self.currtok = next(self.tg)
             right = self.fact()
-            left = MultExpr(left, right)
+            left = BinaryExpr(left, right, '*')
 
         return left
 
@@ -167,7 +207,7 @@ class Parser:
         """
 
         # only advance to the next token on a successful match.
-        if self.currtok[0] == Lexer.MINUS:
+        if self.currtok[1] == Lexer.MINUS:
             self.currtok = next(self.tg)
             tree = self.primary()
             return UnaryMinus(tree)
@@ -182,23 +222,18 @@ class Parser:
         # TODO Add real literals
 
         # parse an ID
-        if self.currtok[0] == Lexer.ID:  # using ID in expression
-            tmp = self.currtok
-            # TODO check to make sure ID is declared (in the dictionary)
-            self.currtok = next(self.tg)
-            return IDExpr(tmp[1])
 
         # parse an integer literal
-        if self.currtok[0] == Lexer.INTLIT:
+        if self.currtok[1] == Lexer.INT:
             tmp = self.currtok
             self.currtok = next(self.tg)
             return IntLitExpr(tmp[1])
 
         # parse a parenthesized expression
-        if self.currtok[0] == Lexer.LPAREN:
+        if self.currtok[1] == Lexer.LPAREN:
             self.currtok = next(self.tg)
             tree = self.addition() # TODO Keeps changing!
-            if self.currtok[0] == Lexer.RPAREN:
+            if self.currtok[1] == Lexer.RPAREN:
                 self.currtok = next(self.tg)
                 return tree
             else:
@@ -225,4 +260,3 @@ if __name__ == '__main__':
     p = Parser('simple.c')
     t = p.addition()
     print(t)
-    print(t.scheme())
