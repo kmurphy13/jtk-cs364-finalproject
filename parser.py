@@ -206,12 +206,12 @@ class Parser:
 
 
     def while_statement(self):
-        if self.currtok[1] == Lexer.WHILE:
+        if self.currtok[0][0] == Lexer.WHILE.id:
             self.next_token()
-        if self.currtok[1] == Lexer.LPAREN:
+        if self.currtok[0][0] == Lexer.LPAREN.id:
             self.next_token()
             self.expression()
-            if self.currtok[1] == Lexer.RPAREN:
+            if self.currtok[0][0] == Lexer.RPAREN.id:
                 self.next_token()
                 self.statements()
                 # self.next_token() TODO: does this go here?
@@ -221,16 +221,16 @@ class Parser:
             raise SLUCSyntaxError("ERROR: Missing left paren on line {0}".format(self.currtok[2]))
 
     def print_statement(self):
-        if self.currtok[1] == Lexer.PRINT:
+        if self.currtok[0][0] == Lexer.PRINT.id:
             self.next_token()
-        if self.currtok[1] == Lexer.LPAREN:
+        if self.currtok[0][0] == Lexer.LPAREN.id:
             self.next_token()
             self.print_arg()
             self.next_token()
-            while self.currtok[1] in { Lexer.COMMA}:
+            while self.currtok[0][0] in { Lexer.COMMA.id}:
                 self.next_token()
                 self.print_arg()
-            if self.currtok[1] == Lexer.RPAREN:
+            if self.currtok[0][0] == Lexer.RPAREN.id:
                 self.next_token()
             else:
                 raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.currtok[2]))
@@ -238,7 +238,7 @@ class Parser:
             raise SLUCSyntaxError("ERROR: Missing left paren on line {0}".format(self.currtok[2]))
 
     def print_arg(self):
-        if self.currtok[1] == Lexer.STRING:
+        if self.currtok[0][0] == Lexer.STRING.id:
             pass
             # return string_lit_expr(self.currtok[1]) ????
         else:
@@ -247,7 +247,7 @@ class Parser:
 
     def expression(self):
         left = self.conjunction()
-        while self.currtok[0] in {Lexer.LOR}:
+        while self.currtok[0][0] in {Lexer.LOR.id}:
             self.next_token()
             right = self.conjunction()
             left = BinaryExpr(left, right, "||")
@@ -255,7 +255,7 @@ class Parser:
 
     def conjunction(self):
         left = self.equality()
-        while self.currtok[0] in {Lexer.LAND}:
+        while self.currtok[0][0] in {Lexer.LAND.id}:
             self.next_token()
             right = self.equality()
             left = BinaryExpr(left, right, "&&")
@@ -274,7 +274,7 @@ class Parser:
 
         left = self.term()
 
-        while self.currtok[1] in { Lexer.PLUS, Lexer.MINUS }:
+        while self.currtok[0][0] in { Lexer.PLUS.id, Lexer.MINUS.id }:
             self.next_token()  # advance to the next token
                                           # because we matched a +
             right = self.term()
@@ -288,7 +288,7 @@ class Parser:
         """
         left = self.fact()
 
-        while self.currtok[1] in { Lexer.MULT, Lexer.DIVIDE }:
+        while self.currtok[0][0] in { Lexer.MULT.id, Lexer.DIVIDE.id }:
             self.next_token()
             right = self.fact()
             left = BinaryExpr(left, right, '*')
@@ -302,7 +302,7 @@ class Parser:
         """
 
         # only advance to the next token on a successful match.
-        if self.currtok[1] == Lexer.MINUS:
+        if self.currtok[0][0] == Lexer.MINUS.id:
             self.next_token()
             tree = self.primary()
             return UnaryMinus(tree)
@@ -319,16 +319,16 @@ class Parser:
         # parse an ID
 
         # parse an integer literal
-        if self.currtok[1] == Lexer.INT:
+        if self.currtok[0][0] == Lexer.INT.id:
             tmp = self.currtok
             self.next_token()
             return IntLitExpr(tmp[1])
 
         # parse a parenthesized expression
-        if self.currtok[1] == Lexer.LPAREN:
+        if self.currtok[0][0] == Lexer.LPAREN.id:
             self.next_token()
             tree = self.addition() # TODO Keeps changing!
-            if self.currtok[1] == Lexer.RPAREN:
+            if self.currtok[0][0] == Lexer.RPAREN.id:
                 self.next_token()
                 return tree
             else:
