@@ -102,6 +102,15 @@ class UnaryMinus(Expr):
     def eval(self):
         return -self.tree.eval()
 
+class ParamsExpr(Expr):
+    def __init__(self, params_list):
+        self.params = params_list
+    def __str__(self):
+        for param in self.params:
+            return ',' + param[0] + ' ' + param[1]
+
+
+
 
 class DeclarationExpr(Expr):
     def __init__(self, dec_type, dec_id):
