@@ -59,7 +59,7 @@ class Parser:
 
         self.lex = Lexer(fn)
         self.tg = self.lex.token_generator()
-        self.currtok = next(self.tg)
+        self.next_token()
 
     """
         Expr  →  Term { (+ | -) Term }
@@ -73,6 +73,9 @@ class Parser:
         -7  -(7 * 5)  -b   unary minus
     """
 
+    def next_token(self):
+        self.currtok = next(self.tg)
+
     # top-level function that will be called
     def program(self):
         """
@@ -85,19 +88,19 @@ class Parser:
         if self.currtok[1] == Lexer.ID:  # using ID in expression
             tmp = self.currtok
             # TODO check to make sure ID is declared (in the dictionary)
-            self.currtok = next(self.tg)
+            self.next_token()
             IDExpr(tmp[1])
             if self.currtok[1] == Lexer.LPAREN:
                 self.params()
-                self.currtok = next(self.tg)
+                self.next_token()
                 if self.currtok[1] == Lexer.RPAREN:
-                    self.currtok = next(self.tg)
+                    self.next_token()
                     if self.currtok[1] == Lexer.RCBRAC:
                         self.declarations()
                         self.statements()
-                        self.currtok = next(self.tg)
+                        self.next_token()
                         if self.currtok[1] == Lexer.LCBRAC:
-                            self.currtok = next(self.tg)
+                            self.next_token()
 
 
     def params(self):
@@ -105,7 +108,7 @@ class Parser:
         if self.currtok[1] == Lexer.ID:  # using ID in expression
             tmp = self.currtok
             # TODO check to make sure ID is declared (in the dictionary)
-            self.currtok = next(self.tg)
+            self.next_token()
             id = IDExpr(tmp[1])
             if self.currtok[1] == Lexer.COMMA:
                 pass
@@ -119,19 +122,19 @@ class Parser:
         # parse int declaration
         if self.currtok[1] == Lexer.INTK:  # using ID in expression
             tmp = self.currtok
-            self.currtok = next(self.tg)
+            self.next_token()
             return tmp[1]
 
         # parse bool declaration
         if self.currtok[1] == Lexer.BOOL:
             tmp = self.currtok
-            self.currtok = next(self.tg)
+            self.next_token()
             return tmp[1]
 
             # parse float declaration
         if self.currtok[1] == Lexer.FLOAT:
             tmp = self.currtok
-            self.currtok = next(self.tg)
+            self.next_token()
             return tmp[1]
 
     def statements(self):
@@ -160,26 +163,26 @@ class Parser:
             raise SLUCSyntaxError("Invalid statement on line {0}".format(self.currtok[2]))
 
     def return_stmt(self):
-        self.currtok = next(self.tg)
+        self.next_token()
         curr_expr = self.expression()
         if self.currtok[1] == Lexer.SEMICOLON.value:
-            self.currtok = next(self.tg)
+            self.next_token()
             return 'return ' + curr_expr + ';'
         raise SLUCSyntaxError("Invalid return statement on line {0}".format(self.currtok[2]))
 
     def block(self):
-        self.currtok = next(self.tg)
+        self.next_token()
         curr_stmts = self.statements()
         if self.currtok[1] == Lexer.RCBRAC.value:
-            self.currtok = next(self.tg)
+            self.next_token()
             return curr_stmts
 
         raise SLUCSyntaxError("ERROR: Missing closing curly brace on line {0}".format(self.currtok[2]))
 
     def assignment(self):
-        self.currtok = next(self.tg)
+        self.next_token()
         if self.currtok[0][0] == Lexer.EQ.id:
-            self.currtok = next(self.tg)
+            self.next_token()
             return self.expression()
 
         raise SLUCSyntaxError("Invalid assignment statement on line {0}".format(self.currtok[2]))
@@ -187,15 +190,15 @@ class Parser:
     def if_stmt(self):
         # if ( Expression ) Statement [ else Statement ]
         if self.currtok[0][0] == Lexer.IF.id:
-            self.currtok = next(self.tg)
+            self.next_token()
             if self.currtok[0][0] == Lexer.LPAREN.id:
-                self.currtok = next(self.tg)
+                self.next_token()
                 self.expression()
                 if self.currtok[0][0] == Lexer.RPAREN.id:
-                    self.currtok = next(self.tg)
+                    self.next_token()
                     self.statement()
                     while self.currtok[0][0] == Lexer.ELSE.id:
-                        self.currtok = next(self.tg)
+                        self.next_token()
                         self.statement()
                 else:
                     raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.currtok[2]))
@@ -204,14 +207,14 @@ class Parser:
 
     def while_statement(self):
         if self.currtok[1] == Lexer.WHILE:
-            self.currtok = next(self.tg)
+            self.next_token()
         if self.currtok[1] == Lexer.LPAREN:
-            self.currtok = next(self.tg)
+            self.next_token()
             self.expression()
             if self.currtok[1] == Lexer.RPAREN:
-                self.currtok = next(self.tg)
+                self.next_token()
                 self.statements()
-                # self.currtok = next(self.tg) TODO: does this go here?
+                # self.next_token() TODO: does this go here?
             else:
                 raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.currtok[2]))
         else:
@@ -219,16 +222,16 @@ class Parser:
 
     def print_statement(self):
         if self.currtok[1] == Lexer.PRINT:
-            self.currtok = next(self.tg)
+            self.next_token()
         if self.currtok[1] == Lexer.LPAREN:
-            self.currtok = next(self.tg)
+            self.next_token()
             self.print_arg()
-            self.currtok = next(self.tg)
+            self.next_token()
             while self.currtok[1] in { Lexer.COMMA}:
-                self.currtok = next(self.tg)
+                self.next_token()
                 self.print_arg()
             if self.currtok[1] == Lexer.RPAREN:
-                self.currtok = next(self.tg)
+                self.next_token()
             else:
                 raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.currtok[2]))
         else:
@@ -240,12 +243,12 @@ class Parser:
             # return string_lit_expr(self.currtok[1]) ????
         else:
             self.expression()
-            self.currtok = next(self.tg)
+            self.next_token()
 
     def expression(self):
         left = self.conjunction()
         while self.currtok[0] in {Lexer.LOR}:
-            self.currtok = next(self.tg)
+            self.next_token()
             right = self.conjunction()
             left = BinaryExpr(left, right, "||")
         return left
@@ -253,7 +256,7 @@ class Parser:
     def conjunction(self):
         left = self.equality()
         while self.currtok[0] in {Lexer.LAND}:
-            self.currtok = next(self.tg)
+            self.next_token()
             right = self.equality()
             left = BinaryExpr(left, right, "&&")
         return left
@@ -272,7 +275,7 @@ class Parser:
         left = self.term()
 
         while self.currtok[1] in { Lexer.PLUS, Lexer.MINUS }:
-            self.currtok = next(self.tg)  # advance to the next token
+            self.next_token()  # advance to the next token
                                           # because we matched a +
             right = self.term()
             left = BinaryExpr(left,right, '+')
@@ -286,7 +289,7 @@ class Parser:
         left = self.fact()
 
         while self.currtok[1] in { Lexer.MULT, Lexer.DIVIDE }:
-            self.currtok = next(self.tg)
+            self.next_token()
             right = self.fact()
             left = BinaryExpr(left, right, '*')
 
@@ -300,7 +303,7 @@ class Parser:
 
         # only advance to the next token on a successful match.
         if self.currtok[1] == Lexer.MINUS:
-            self.currtok = next(self.tg)
+            self.next_token()
             tree = self.primary()
             return UnaryMinus(tree)
 
@@ -318,15 +321,15 @@ class Parser:
         # parse an integer literal
         if self.currtok[1] == Lexer.INT:
             tmp = self.currtok
-            self.currtok = next(self.tg)
+            self.next_token()
             return IntLitExpr(tmp[1])
 
         # parse a parenthesized expression
         if self.currtok[1] == Lexer.LPAREN:
-            self.currtok = next(self.tg)
+            self.next_token()
             tree = self.addition() # TODO Keeps changing!
             if self.currtok[1] == Lexer.RPAREN:
-                self.currtok = next(self.tg)
+                self.next_token()
                 return tree
             else:
                 # use the line number from your token object
