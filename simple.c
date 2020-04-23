@@ -1,6 +1,3 @@
-a + b * d * (z + w) + -(a + b * c * (d + e))
-
-// Test #1 Euler project problem 1
 int sum_3_or_5(int n) {
  int sum;
  int i;

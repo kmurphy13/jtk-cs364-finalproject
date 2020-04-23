@@ -25,20 +25,16 @@ class UnaryMinus(Expr):
 
 
 class IDExpr(Expr):
-
     def __init__(self, identifier: str):
         self.id = identifier
 
     def __str__(self):
         return self.id
 
-    def scheme(self):
-        return self.id
-
-    def eval(self, env):  # a + 7
-        # lookup the value of self.id. Look up where?
-        # env is a dictionary
-        pass
+    # def eval(self, env):  # a + 7
+    #     # lookup the value of self.id. Look up where?
+    #     # env is a dictionary
+    #     pass
 
 
 class FuncIDExpr(Expr):
@@ -72,7 +68,7 @@ class BinaryExpr(Expr):
         self.op = op
 
     def __str__(self):
-        return "(" + str(self.left) + " " + self.op + " " + str(self.right) + ")"
+        return str(self.left) + " " + self.op + " " + str(self.right)
 
     def eval(self) -> Union[int, float]:
         l = self.left.eval()
@@ -106,8 +102,12 @@ class Statements:
         self.statement_list = statement_list
 
     def __str__(self):
-        for stmt in self.statement_list:
-            return str(stmt)
+        output = ''
+        if self.statement_list:
+            output += str(self.statement_list[0])
+            for arg in self.statement_list[1:]:
+                output += ('\n' + str(arg))
+        return output
 
 
 class Block(Stmt):
@@ -125,14 +125,10 @@ class IfStmt(Stmt):
         self.false_part = false_part
 
     def __str__(self):
-        return 'if ( ' + str(self.cond) + ' )' + str(self.true_part) + \
-               (' else' if self.false_part else '') + str(self.false_part)
-    # def eval(self, env):
-    #
-    #     if self.cond.eval():
-    #         self.truepart.eval(env)
-    #     elif self.falsepart is not None:
-    #         self.falsepart.eval(env)
+        if self.false_part:
+            return 'if (' + str(self.cond) + ') ' + str(self.true_part) + ' else ' + str(self.false_part) + '\n'
+        else:
+            return 'if (' + str(self.cond) + ') ' + str(self.true_part) + '\n'
 
 
 class PrintStmt(Stmt):
@@ -140,11 +136,20 @@ class PrintStmt(Stmt):
         self.print_args = print_args
 
     def __str__(self):
-        output = "print("
-        for arg in self.print_args:
-            output += (str(arg) + ",")
-        output += ")"
-        return output
+        output = 'print('
+        if self.print_args:
+            output += str(self.print_args[0])
+            for arg in self.print_args[1:]:
+                output += (', ' + str(arg))
+        return output + ')'
+
+
+class ReturnStmt(Stmt):
+    def __init__(self, return_expr: Expr):
+        self.return_expr = return_expr
+
+    def __str__(self):
+        return 'return ' + str(self.return_expr) + ';'
 
 
 class WhileStmt(Stmt):
@@ -155,8 +160,9 @@ class WhileStmt(Stmt):
     def __str__(self):
         return 'while ' + str(self.expr) + ' ' + str(self.statement)
 
+
 class AssignStmt(Stmt):
-    def __init__(self,assign_id: IDExpr, assign_expression: Expr):
+    def __init__(self, assign_id: IDExpr, assign_expression: Expr):
         self.assign_id = assign_id
         self.assign_expression = assign_expression
 
@@ -215,9 +221,8 @@ class FunctionDef:
         self.stmts = stmts
 
     def __str__(self):
-        return "{0} {1}({2}){ \n {3} \n {4} \n }".format(
-            self.func_type, self.func_id, self.params, self.decls, self.stmts
-        )
+        return self.func_type + str(self.func_id) + "(" + str(self.params) + ") {\n" + str(self.decls) + \
+               "\n" + str(self.stmts) + "\n}"
 
     # def eval(self) -> Union[int, float, bool]:
     #     # an environment maps identifiers to values
@@ -234,8 +239,12 @@ class Program:
         self.funcs = funcs
 
     def __str__(self):
-        for func in self.funcs:
-            return func
+        output = ''
+        if self.funcs:
+            output += str(self.funcs[0])
+            for func in self.funcs[1:]:
+                output += ('\n\n' + str(func))
+        return output
 
 
 class SLUCTypeError(Exception):
@@ -248,13 +257,33 @@ class SLUCTypeError(Exception):
 
 
 if __name__ == '__main__':
-    """
-    Represent a + b + c * d
-    ((a + b) + (c * d))
-    """
-    statement = Statements([WhileStmt(BinaryExpr(IDExpr("a"),IDExpr("b"),"<"),Block(Statements([AssignStmt(IDExpr("a"),BinaryExpr(IDExpr("a"),IDExpr("b"),"+"))])))])
-    declarations = Declarations([DeclarationExpr('int', 'b'), DeclarationExpr('bool', 'c')])
 
-    # expr = Program(Sequence[FunctionDef('bool', IDExpr('a_function'), Params([ParamExpr('int', 'a')]),
-    #                                     Declarations([DeclarationExpr('int', 'b')]), Statements([AssignStmt()]))])
-    print(statement)
+    while_stmt = WhileStmt(
+        BinaryExpr(IDExpr("a"), IDExpr("b"), "<"),
+        Block(Statements([AssignStmt(IDExpr("a"), BinaryExpr(IDExpr("a"), IDExpr("b"), "+"))]))
+    )
+
+    print_stmt = PrintStmt([StringLitExpr("Kira"), BinaryExpr(IDExpr("a"), IDExpr("b"), "+")])
+
+    return_stmt = ReturnStmt(BinaryExpr(IDExpr("a"), IDExpr("b"), "<"))
+
+    declarations_test = Declarations([DeclarationExpr('int', 'b'), DeclarationExpr('bool', 'c')])
+
+    if_stmt = IfStmt(
+        BinaryExpr(IDExpr("a"), IDExpr("b"), "<"),
+        Block(Statements([AssignStmt(IDExpr("a"), BinaryExpr(IDExpr("a"), IDExpr("b"), "+"))])),
+        Block(Statements([AssignStmt(IDExpr("a"), BinaryExpr(IDExpr("a"), IDExpr("b"), "+"))]))
+    )
+
+    params_test = Params([ParamExpr('int', 'a'), ParamExpr('bool', 'd')])
+    statements_test = Statements([if_stmt, print_stmt, return_stmt])
+
+    expr = Program([FunctionDef(
+        'bool',
+        IDExpr('a_function'),
+        params_test,
+        declarations_test,
+        statements_test
+    )])
+
+    print(expr)

@@ -15,9 +15,12 @@ class Parser:
 
     # top-level function that will be called
     def program(self):
+        functions = []
         curr_func = self.function_def()
         while curr_func:
-            self.function_def()
+            functions.append(FunctionDef(curr_func))
+            curr_func = self.function_def()
+        return Program(functions)
 
     def function_def(self):
         func_type = self.type()
@@ -36,8 +39,8 @@ class Parser:
                         func_decls = self.declarations()
                         func_stmts = self.statements()
                         if self.curr_token[1] == Lexer.LCBRAC.value:
-                            FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
                             self.next_token()
+                            return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
         else:
             return False
 
@@ -52,8 +55,7 @@ class Parser:
                 param_id = IDExpr(tmp[1])
                 params_list.append(ParamExpr(param_type, param_id))
 
-        return params_list
-
+        return Params(params_list)
 
     def declarations(self):
         declaration_list = []
@@ -61,7 +63,7 @@ class Parser:
         while curr_dec:
             declaration_list.append(curr_dec)
             curr_dec = self.declaration()
-        return DeclarationsExpr(declaration_list)
+        return Declarations(declaration_list)
 
     def declaration(self):
         dec_type = self.type()
@@ -322,5 +324,5 @@ class SLUCSyntaxError(Exception):
 
 if __name__ == '__main__':
     p = Parser('simple.c')
-    t = p.addition()
+    t = p.program()
     print(t)
