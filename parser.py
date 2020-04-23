@@ -136,20 +136,70 @@ class Parser:
 
     def statements(self):
         pass
-    def statment(self):
-        pass
+
+    def statement(self):
+        # get the id of the token
+        current_token = self.currtok[0][0]
+        # Check through the possible values for statement
+        # Statement → ; | Block | Assignment | IfStatement | WhileStatement | PrintStmt | ReturnStmt
+        if current_token == Lexer.SEMICOLON.id:
+            return Lexer.SEMICOLON.value
+        elif current_token == Lexer.LCBRAC.id:
+            return self.block()
+        elif current_token == Lexer.ID.id:
+            return self.assignment()
+        elif current_token == Lexer.IF.id:
+            return self.if_stmt()
+        elif current_token == Lexer.WHILE.id:
+            return self.while_statement()
+        elif current_token == Lexer.PRINT.id:
+            return self.print_statement()
+        elif self.currtok[1] == 'return':
+            return self.return_stmt()
+        else:
+            raise SLUCSyntaxError("Invalid statement on line {0}".format(self.currtok[2]))
 
     def return_stmt(self):
-        pass
+        self.currtok = next(self.tg)
+        curr_expr = self.expression()
+        if self.currtok[1] == Lexer.SEMICOLON.value:
+            self.currtok = next(self.tg)
+            return 'return ' + curr_expr + ';'
+        raise SLUCSyntaxError("Invalid return statement on line {0}".format(self.currtok[2]))
 
     def block(self):
-        pass
+        self.currtok = next(self.tg)
+        curr_stmts = self.statements()
+        if self.currtok[1] == Lexer.RCBRAC.value:
+            self.currtok = next(self.tg)
+            return curr_stmts
+
+        raise SLUCSyntaxError("ERROR: Missing closing curly brace on line {0}".format(self.currtok[2]))
 
     def assignment(self):
-        pass
+        self.currtok = next(self.tg)
+        if self.currtok[0][0] == Lexer.EQ.id:
+            self.currtok = next(self.tg)
+            return self.expression()
+
+        raise SLUCSyntaxError("Invalid assignment statement on line {0}".format(self.currtok[2]))
 
     def if_stmt(self):
-        pass
+        # if ( Expression ) Statement [ else Statement ]
+        if self.currtok[0][0] == Lexer.IF.id:
+            self.currtok = next(self.tg)
+            if self.currtok[0][0] == Lexer.LPAREN.id:
+                self.currtok = next(self.tg)
+                self.expression()
+                if self.currtok[0][0] == Lexer.RPAREN.id:
+                    self.currtok = next(self.tg)
+                    self.statement()
+                    while self.currtok[0][0] == Lexer.ELSE.id:
+                        self.currtok = next(self.tg)
+                        self.statement()
+                else:
+                    raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.currtok[2]))
+        raise SLUCSyntaxError("ERROR: Invalid if statement on line {0}".format(self.currtok[2]))
 
 
     def while_statement(self):
