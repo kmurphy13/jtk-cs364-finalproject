@@ -32,13 +32,16 @@ class Parser:
             if self.curr_token[1] == Lexer.LPAREN.value:
                 self.next_token()
                 func_params = self.params()
+                print("Params " + str(func_params))
                 if self.curr_token[1] == Lexer.RPAREN.value:
                     self.next_token()
-                    if self.curr_token[1] == Lexer.RCBRAC.value:
+                    if self.curr_token[1] == Lexer.LCBRAC.value:
                         self.next_token()
                         func_decls = self.declarations()
+                        print("decls " + str(func_decls))
                         func_stmts = self.statements()
-                        if self.curr_token[1] == Lexer.LCBRAC.value:
+                        print("stmts " + str(func_stmts))
+                        if self.curr_token[1] == Lexer.RCBRAC.value:
                             self.next_token()
                             return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
         else:
@@ -107,6 +110,7 @@ class Parser:
     def statement(self):
         # get the id of the token
         current_token = self.curr_token[0][0]
+        print('current_token is: ' + str(self.curr_token[1]) + ' on line: ' + str(self.curr_token[2]))
         # Check through the possible values for statement
         # Statement → ; | Block | Assignment | IfStatement | WhileStatement | PrintStmt | ReturnStmt
         if current_token == Lexer.SEMICOLON.id:

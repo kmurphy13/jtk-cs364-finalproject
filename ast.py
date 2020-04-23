@@ -176,7 +176,7 @@ class ParamExpr(Expr):
         self.param_id = param_id
 
     def __str__(self):
-        return self.param_type + ' ' + self.param_id
+        return str(self.param_type) + ' ' + str(self.param_id)
 
 
 class Params:
@@ -198,7 +198,7 @@ class DeclarationExpr:
         self.id = dec_id
 
     def __str__(self):
-        return self.type + ' ' + self.id + ';'
+        return str(self.type) + ' ' + str(self.id) + ';'
 
 
 class Declarations:
