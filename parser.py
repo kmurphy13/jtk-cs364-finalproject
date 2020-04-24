@@ -264,9 +264,10 @@ class Parser:
         left = self.term()
 
         while self.curr_token[0][0] in { Lexer.PLUS.id, Lexer.MINUS.id }:
+            operation = self.curr_token[1]
             self.next_token()  # advance to the next token
             right = self.term()
-            left = BinaryExpr(left, right, '+')
+            left = BinaryExpr(left, right, operation)
 
         return left
 
