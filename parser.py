@@ -170,6 +170,7 @@ class Parser:
                     self.next_token()
                     true_part = self.statement()
                     false_part = None
+                    self.next_token()
                     while self.curr_token[0][0] == Lexer.ELSE.id:
                         self.next_token()
                         false_part = self.statement()

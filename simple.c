@@ -6,8 +6,7 @@ int sum_3_or_5(int n) {
  while (i < n) {
  if (i % 3 == 0 || i % 5 == 0)
  sum = sum + i;
-
- i = i + 1;
+ else i = i + 1;
  }
  return sum;
 }
