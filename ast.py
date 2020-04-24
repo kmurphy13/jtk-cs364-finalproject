@@ -245,7 +245,7 @@ class FunctionDef:
         self.stmts = stmts
 
     def __str__(self):
-        return self.func_type + str(self.func_id) + "(" + str(self.params) + ") {\n" + str(self.decls) + \
+        return self.func_type + ' ' + str(self.func_id) + "(" + str(self.params) + ") {\n" + str(self.decls) + \
                "\n" + str(self.stmts) + "\n}"
 
     # def eval(self) -> Union[int, float, bool]:
