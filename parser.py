@@ -104,6 +104,8 @@ class Parser:
         statement_list = []
         curr_statement = self.statement()
         while curr_statement:
+            if self.curr_token[1] == Lexer.SEMICOLON.value:
+                self.next_token()
             statement_list.append(curr_statement)
             curr_statement = self.statement()
         return Statements(statement_list)
@@ -111,12 +113,15 @@ class Parser:
     def statement(self):
         # get the id of the token
         current_token = self.curr_token[0][0]
+        value = self.curr_token[1]
         # Check through the possible values for statement
         # Statement → ; | Block | Assignment | IfStatement | WhileStatement | PrintStmt | ReturnStmt
+
         if current_token == Lexer.SEMICOLON.id:
+            print('semicolon called')
             self.next_token()
             return ';'
-        elif current_token == Lexer.LCBRAC.id:
+        if current_token == Lexer.LCBRAC.id:
             return self.block()
         elif current_token == Lexer.ID.id:
             return self.assignment()
@@ -129,7 +134,9 @@ class Parser:
         elif self.curr_token[1] == 'return':
             return self.return_stmt()
         else:
+            print(self.curr_token)
             self.next_token()
+
             return False
 
     def return_stmt(self):
