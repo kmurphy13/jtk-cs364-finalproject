@@ -133,6 +133,13 @@ class Block(Stmt):
     def __str__(self):
         return "{\n\t" + str(self.stmts) + "\n}"
 
+class ReturnStmt(Stmt):
+    def __init__(self, ret_val: Expr):
+        self.ret_val = ret_val
+
+    def __str__(self):
+        return "return " + str(self.ret_val) + ";"
+
 
 class IfStmt(Stmt):
     def __init__(self, cond: Expr, true_part: Stmt, false_part: Optional[Stmt]):

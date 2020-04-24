@@ -142,7 +142,7 @@ class Parser:
         curr_expr = self.expression()
         if self.curr_token[0][0] == Lexer.SEMICOLON.id:
             self.next_token()
-            return curr_expr
+            return ReturnStmt(curr_expr)
         raise SLUCSyntaxError("Invalid return statement on line {0}".format(self.curr_token[2]))
 
     def block(self):
