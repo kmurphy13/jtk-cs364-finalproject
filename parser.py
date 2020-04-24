@@ -82,13 +82,15 @@ class Parser:
                 raise SLUCSyntaxError("ERROR: Variable '{0}' declared on line {1} has already been declared".format(
                     func_id, self.curr_token[2]))
             else:
-                var_dict[func_id] = None
-                self.next_token()
-                id = IDExpr(tmp[1])
-                if self.curr_token[1] == Lexer.SEMICOLON.value:
+                if func_id == Lexer.ID.value:
+                    var_dict[func_id] = None
                     self.next_token()
-                    return DeclarationExpr(dec_type, id)
-
+                    id = IDExpr(tmp[1])
+                    if self.curr_token[1] == Lexer.SEMICOLON.value:
+                        self.next_token()
+                        return DeclarationExpr(dec_type, id)
+                else:
+                    raise SLUCSyntaxError("ERROR: Variable '{0}' declared on line {1} is not a valid identifier.".format(func_id, self.curr_token[2]))
         return False
 
     def type(self):
