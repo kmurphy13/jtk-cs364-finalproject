@@ -54,11 +54,27 @@ class StringLitExpr(Expr):
 
 
 class IntLitExpr(Expr):
-    def __init__(self, intlit: str):
-        self.intlit = int(intlit)
+    def __init__(self, int_lit: str):
+        self.int_lit = int(int_lit)
 
     def __str__(self):
-        return str(self.intlit)
+        return str(self.int_lit)
+
+
+class FloatLitExpr(Expr):
+    def __init__(self, float_lit: str):
+        self.float_lit = float(float_lit)
+
+    def __str__(self):
+        return str(self.float_lit)
+
+
+class BoolExpr(Expr):
+    def __init__(self, bool_val: str):
+        self.bool_val = (bool_val == 'True')
+
+    def __str__(self):
+        return str(self.bool_val)
 
 
 class BinaryExpr(Expr):

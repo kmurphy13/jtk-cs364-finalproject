@@ -33,31 +33,30 @@ class Parser:
                 self.next_token()
                 func_params = self.params()
                 print("Params " + str(func_params))
-                if self.curr_token[1] == Lexer.RPAREN.value:
+                if self.curr_token[1] == Lexer.LCBRAC.value:
                     self.next_token()
-                    if self.curr_token[1] == Lexer.LCBRAC.value:
+                    func_decls = self.declarations()
+                    print("decls " + str(func_decls))
+                    func_stmts = self.statements()
+                    print("stmts " + str(func_stmts))
+                    if self.curr_token[1] == Lexer.RCBRAC.value:
                         self.next_token()
-                        func_decls = self.declarations()
-                        print("decls " + str(func_decls))
-                        func_stmts = self.statements()
-                        print("stmts " + str(func_stmts))
-                        if self.curr_token[1] == Lexer.RCBRAC.value:
-                            self.next_token()
-                            return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
+                        return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
         else:
             return False
 
     def params(self):
         params_list = []
-        while self.curr_token[1] != Lexer.RPAREN.value:
+
+        while self.curr_token[0][0] != Lexer.RPAREN.id:
             param_type = self.type()
-            if self.curr_token[0][0] == Lexer.ID.id:  # using ID in expression
+            if self.curr_token[0][0] == Lexer.ID.id: # using ID in expression
                 tmp = self.curr_token
                 # TODO check to make sure ID is declared (in the dictionary)
-                self.next_token()
                 param_id = IDExpr(tmp[1])
                 params_list.append(ParamExpr(param_type, param_id))
-
+            self.next_token()
+        self.next_token()
         return Params(params_list)
 
     def declarations(self):
@@ -70,7 +69,7 @@ class Parser:
 
     def declaration(self):
         dec_type = self.type()
-        if self.curr_token[0][0] == Lexer.ID.id:  # using ID in expression
+        if dec_type:  # using ID in expression
             tmp = self.curr_token
             # TODO check to make sure ID is declared (in the dictionary)
             self.next_token()
@@ -83,7 +82,7 @@ class Parser:
 
     def type(self):
         # parse int declaration
-        if self.curr_token[0][0] == Lexer.INTK.id:  # using ID in expression
+        if self.curr_token[0][0] == Lexer.INTK.id:
             tmp = self.curr_token
             self.next_token()
             return tmp[1]
@@ -103,18 +102,21 @@ class Parser:
 
     def statements(self):
         statement_list = []
-        while self.curr_token[0][0] != Lexer.RCBRAC.id:
-            statement_list.append(self.statement())
+        curr_statement = self.statement()
+        while curr_statement:
+            statement_list.append(curr_statement)
+            curr_statement = self.statement()
         return Statements(statement_list)
 
     def statement(self):
         # get the id of the token
         current_token = self.curr_token[0][0]
-        print('current_token is: ' + str(self.curr_token[1]) + ' on line: ' + str(self.curr_token[2]))
+
+        self.next_token()
         # Check through the possible values for statement
         # Statement → ; | Block | Assignment | IfStatement | WhileStatement | PrintStmt | ReturnStmt
         if current_token == Lexer.SEMICOLON.id:
-            return Lexer.SEMICOLON.value
+            return ';'
         elif current_token == Lexer.LCBRAC.id:
             return self.block()
         elif current_token == Lexer.ID.id:
@@ -128,26 +130,24 @@ class Parser:
         elif self.curr_token[1] == 'return':
             return self.return_stmt()
         else:
-            raise SLUCSyntaxError("Invalid statement on line {0}".format(self.curr_token[2]))
+            return False
 
     def return_stmt(self):
-        self.next_token()
         curr_expr = self.expression()
-        if self.curr_token[1] == Lexer.SEMICOLON.value:
+        if self.curr_token[0][0] == Lexer.SEMICOLON.id:
             self.next_token()
             return curr_expr
         raise SLUCSyntaxError("Invalid return statement on line {0}".format(self.curr_token[2]))
 
     def block(self):
-        self.next_token()
-        Block(self.statements())
-        if self.curr_token[1] == Lexer.RCBRAC.value:
+        block_content = self.statements()
+        if self.curr_token[0][0] == Lexer.RCBRAC.id:
             self.next_token()
-
-        raise SLUCSyntaxError("ERROR: Missing closing curly brace on line {0}".format(self.curr_token[2]))
+            return Block(block_content)
+        else:
+            raise SLUCSyntaxError("ERROR: Missing closing curly brace on line {0}".format(self.curr_token[2]))
 
     def assignment(self):
-        self.next_token()
         if self.curr_token[0][0] == Lexer.EQ.id:
             self.next_token()
             return self.expression()
@@ -160,13 +160,15 @@ class Parser:
             self.next_token()
             if self.curr_token[0][0] == Lexer.LPAREN.id:
                 self.next_token()
-                self.expression()
+                condition = self.expression()
                 if self.curr_token[0][0] == Lexer.RPAREN.id:
                     self.next_token()
-                    self.statement()
+                    true_part = self.statement()
+                    false_part = None
                     while self.curr_token[0][0] == Lexer.ELSE.id:
                         self.next_token()
-                        self.statement()
+                        false_part = self.statement()
+                    return IfStmt(condition, true_part, (false_part if false_part else None))
                 else:
                     raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.curr_token[2]))
         raise SLUCSyntaxError("ERROR: Invalid if statement on line {0}".format(self.curr_token[2]))
@@ -260,24 +262,17 @@ class Parser:
         return left
 
     def term(self) -> Expr:
-        """
-        Term  → Fact { * Fact }
-        """
         left = self.fact()
 
-        while self.curr_token[0][0] in { Lexer.MULT.id, Lexer.DIV.id }:
+        while self.curr_token[0][0] in {Lexer.MULT.id, Lexer.DIV.id, Lexer.MOD.id}:
+            operation = self.curr_token[1]
             self.next_token()
             right = self.fact()
-            left = BinaryExpr(left, right, '*')
+            left = BinaryExpr(left, right, operation)
 
         return left
 
     def fact(self) -> Expr:
-        """
-        Fact  → [ - ] Primary
-            e.g., -a  -(b+c)  -6    (b+c) a 6
-        """
-
         # only advance to the next token on a successful match.
         if self.curr_token[0][0] == Lexer.MINUS.id:
             self.next_token()
@@ -287,13 +282,11 @@ class Parser:
         return self.primary()
 
     def primary(self) -> Expr:
-        """
-        Primary  → ID | INTLIT | ( Expr )
-        """
-
-        # TODO Add real literals
-
         # parse an ID
+        if self.curr_token[0][0] == Lexer.ID.id:
+            tmp = self.curr_token
+            self.next_token()
+            return IDExpr(tmp[1])
 
         # parse an integer literal
         if self.curr_token[0][0] == Lexer.INT.id:
@@ -301,10 +294,22 @@ class Parser:
             self.next_token()
             return IntLitExpr(tmp[1])
 
+        # parse an real
+        if self.curr_token[0][0] == Lexer.REAL.id:
+            tmp = self.curr_token
+            self.next_token()
+            return FloatLitExpr(tmp[1])
+
+        # parse booleans
+        if self.curr_token[0][0] in {Lexer.TRUE.id, Lexer.FALSE.id}:
+            tmp = self.curr_token
+            self.next_token()
+            return BoolExpr(tmp[1])
+
         # parse a parenthesized expression
         if self.curr_token[0][0] == Lexer.LPAREN.id:
             self.next_token()
-            tree = self.addition() # TODO Keeps changing!
+            tree = self.expression()
             if self.curr_token[0][0] == Lexer.RPAREN.id:
                 self.next_token()
                 return tree
@@ -313,7 +318,7 @@ class Parser:
                 raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(-1))
 
         # what if we get here we have a problem
-        raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".format(self.curr_token[1], -1))
+        raise SLUCSyntaxError("ERROR: Unexpected token {0} on line {1}".format(self.curr_token[1], self.curr_token[2]))
 
 
 # from Python's exception
