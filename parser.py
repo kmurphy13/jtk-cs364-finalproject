@@ -111,11 +111,10 @@ class Parser:
     def statement(self):
         # get the id of the token
         current_token = self.curr_token[0][0]
-
-        self.next_token()
         # Check through the possible values for statement
         # Statement → ; | Block | Assignment | IfStatement | WhileStatement | PrintStmt | ReturnStmt
         if current_token == Lexer.SEMICOLON.id:
+            self.next_token()
             return ';'
         elif current_token == Lexer.LCBRAC.id:
             return self.block()
@@ -130,9 +129,11 @@ class Parser:
         elif self.curr_token[1] == 'return':
             return self.return_stmt()
         else:
+            self.next_token()
             return False
 
     def return_stmt(self):
+        self.next_token()
         curr_expr = self.expression()
         if self.curr_token[0][0] == Lexer.SEMICOLON.id:
             self.next_token()
@@ -140,6 +141,7 @@ class Parser:
         raise SLUCSyntaxError("Invalid return statement on line {0}".format(self.curr_token[2]))
 
     def block(self):
+        self.next_token()
         block_content = self.statements()
         if self.curr_token[0][0] == Lexer.RCBRAC.id:
             self.next_token()
@@ -148,9 +150,11 @@ class Parser:
             raise SLUCSyntaxError("ERROR: Missing closing curly brace on line {0}".format(self.curr_token[2]))
 
     def assignment(self):
+        curr_id = self.curr_token[1]
+        self.next_token()
         if self.curr_token[0][0] == Lexer.EQ.id:
             self.next_token()
-            return self.expression()
+            return AssignStmt(IDExpr(curr_id), self.expression())
 
         raise SLUCSyntaxError("Invalid assignment statement on line {0}".format(self.curr_token[2]))
 
@@ -195,7 +199,7 @@ class Parser:
             self.next_token()
             self.print_arg()
             self.next_token()
-            while self.curr_token[0][0] in { Lexer.COMMA.id}:
+            while self.curr_token[0][0] in {Lexer.COMMA.id}:
                 self.next_token()
                 self.print_arg()
             if self.curr_token[0][0] == Lexer.RPAREN.id:
