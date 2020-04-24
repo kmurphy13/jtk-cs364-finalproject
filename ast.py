@@ -152,7 +152,7 @@ class IfStmt(Stmt):
         if self.false_part:
             return '\tif (' + str(self.cond) + ')\n' + str(self.true_part) + '\n\telse\n\t\t' + str(self.false_part) + '\n'
         else:
-            return '\tif (' + str(self.cond) + ') \n\t\t' + str(self.true_part) + '\n'
+            return '\tif (' + str(self.cond) + ') \n\t' + str(self.true_part) + '\n'
 
 
 class PrintStmt(Stmt):
@@ -160,12 +160,12 @@ class PrintStmt(Stmt):
         self.print_args = print_args
 
     def __str__(self):
-        output = 'print('
+        output = '\tprint('
         if self.print_args:
             output += str(self.print_args[0])
             for arg in self.print_args[1:]:
                 output += (', ' + str(arg))
-        return output + ')'
+        return output + ');'
 
 
 class ReturnStmt(Stmt):
@@ -222,7 +222,7 @@ class DeclarationExpr:
         self.id = dec_id
 
     def __str__(self):
-        return str(self.type) + ' ' + str(self.id) + ';'
+        return "\t" + str(self.type) + ' ' + str(self.id) + ';'
 
 
 class Declarations:
@@ -230,9 +230,9 @@ class Declarations:
         self.dec_list = dec_list
 
     def __str__(self):
-        output = '\t'
+        output = ''
         for dec in self.dec_list:
-            output += str(dec) + '\n\t'
+            output += str(dec) + '\n'
         return output
 
 
