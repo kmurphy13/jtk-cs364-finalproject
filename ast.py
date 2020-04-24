@@ -1,4 +1,4 @@
-from typing import Sequence, Union, Optional, List, Tuple
+from typing import Sequence, Union, Optional, List
 import operator
 
 
@@ -132,6 +132,7 @@ class Block(Stmt):
 
     def __str__(self):
         return "{\n\t" + str(self.stmts) + "\n}"
+
 
 class ReturnStmt(Stmt):
     def __init__(self, ret_val: Expr):

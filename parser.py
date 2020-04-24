@@ -23,10 +23,14 @@ class Parser:
         return Program(functions)
 
     def function_def(self):
+        var_dict = {}
+
         func_type = self.type()
         if self.curr_token[0][0] == Lexer.ID.id or self.curr_token[0][0]==Lexer.MAIN.id:
             tmp = self.curr_token
-            # TODO check to make sure ID is declared (in the dictionary)
+            func_id = tmp[1]
+            if func_id in var_dict:
+                raise SLUCSyntaxError("Variable declared line {0} already exists".format(self.curr_token[2]))
             func_id = IDExpr(tmp[1])
             self.next_token()
             if self.curr_token[1] == Lexer.LPAREN.value:
