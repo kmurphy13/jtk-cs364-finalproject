@@ -34,7 +34,7 @@ int main() {
 	prime = true;
 	while (prime && i < n / 2.0){
 	if (n % i == 0) 
-	prime = false;
+		prime = false;
 
 	i = i + 1;
 	}

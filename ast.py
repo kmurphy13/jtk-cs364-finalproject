@@ -145,7 +145,7 @@ class IfStmt(Stmt):
         if self.false_part:
             return 'if (' + str(self.cond) + ')\n\t\t' + str(self.true_part) + '\n\telse\n\t\t' + str(self.false_part) + '\n'
         else:
-            return 'if (' + str(self.cond) + ') \n\t' + str(self.true_part) + '\n'
+            return 'if (' + str(self.cond) + ') \n\t\t' + str(self.true_part) + '\n'
 
 
 class PrintStmt(Stmt):

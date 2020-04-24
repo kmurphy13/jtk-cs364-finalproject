@@ -137,7 +137,6 @@ class Parser:
         # Statement → ; | Block | Assignment | IfStatement | WhileStatement | PrintStmt | ReturnStmt
 
         if current_token == Lexer.SEMICOLON.id:
-            print('semicolon called')
             self.next_token()
             return ';'
         if current_token == Lexer.LCBRAC.id:
