@@ -82,7 +82,7 @@ class Parser:
                 raise SLUCSyntaxError("ERROR: Variable '{0}' declared on line {1} has already been declared".format(
                     func_id, self.curr_token[2]))
             else:
-                if func_id == Lexer.ID.value:
+                if tmp[0][0] == Lexer.ID.id:
                     var_dict[func_id] = None
                     self.next_token()
                     id = IDExpr(tmp[1])

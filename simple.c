@@ -1,6 +1,5 @@
 // Test #1 Euler project problem 1
 int sum_3_or_5(int n) {
- int 4;
  int sum;
  int i;
  sum = 0;
@@ -15,7 +14,6 @@ int sum_3_or_5(int n) {
  return sum;
 }
 int main() {
- int 4;
  print("The answer is: ", 1000, "Woot!");
 }
 // Test #2 A program that determines if
