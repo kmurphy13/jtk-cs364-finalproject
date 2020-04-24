@@ -4,7 +4,7 @@ int sum_3_or_5(int n) {
  int i;
  sum = 0;
  i = 0;
- while (i < n) {
+ while (i < x) {
  if (i % 3 == 0 || i % 5 == 0)
  sum = sum + i;
  else sum = 0;

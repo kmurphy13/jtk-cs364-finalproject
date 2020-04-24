@@ -26,7 +26,7 @@ class Parser:
         var_dict = {}
 
         func_type = self.type()
-        if self.curr_token[0][0] == Lexer.ID.id or self.curr_token[0][0]==Lexer.MAIN.id:
+        if self.curr_token[0][0] == Lexer.ID.id or self.curr_token[0][0] == Lexer.MAIN.id:
             tmp = self.curr_token
             func_id = tmp[1]
             if func_id in var_dict:
@@ -35,49 +35,59 @@ class Parser:
             self.next_token()
             if self.curr_token[1] == Lexer.LPAREN.value:
                 self.next_token()
-                func_params = self.params()
+                func_params = self.params(var_dict)
                 if self.curr_token[1] == Lexer.LCBRAC.value:
                     self.next_token()
-                    func_decls = self.declarations()
-                    func_stmts = self.statements()
+                    func_decls = self.declarations(var_dict)
+                    func_stmts = self.statements(var_dict)
                     if self.curr_token[1] == Lexer.RCBRAC.value:
                         self.next_token()
                         return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
         else:
             return False
 
-    def params(self):
+    def params(self, var_dict):
         params_list = []
 
         while self.curr_token[0][0] != Lexer.RPAREN.id:
             param_type = self.type()
             if self.curr_token[0][0] == Lexer.ID.id: # using ID in expression
                 tmp = self.curr_token
-                # TODO check to make sure ID is declared (in the dictionary)
-                param_id = IDExpr(tmp[1])
-                params_list.append(ParamExpr(param_type, param_id))
+                func_id = tmp[1]
+                if func_id in var_dict:
+                    raise SLUCSyntaxError("Variable '{1}' declared line {0} already exists".format(
+                        func_id, self.curr_token[2]))
+                else:
+                    var_dict[func_id] = None
+                    param_id = IDExpr(tmp[1])
+                    params_list.append(ParamExpr(param_type, param_id))
             self.next_token()
         self.next_token()
         return Params(params_list)
 
-    def declarations(self):
+    def declarations(self, var_dict):
         declaration_list = []
-        curr_dec = self.declaration()
+        curr_dec = self.declaration(var_dict)
         while curr_dec:
             declaration_list.append(curr_dec)
-            curr_dec = self.declaration()
+            curr_dec = self.declaration(var_dict)
         return Declarations(declaration_list)
 
-    def declaration(self):
+    def declaration(self, var_dict):
         dec_type = self.type()
         if dec_type:  # using ID in expression
             tmp = self.curr_token
-            # TODO check to make sure ID is declared (in the dictionary)
-            self.next_token()
-            id = IDExpr(tmp[1])
-            if self.curr_token[1] == Lexer.SEMICOLON.value:
+            func_id = tmp[1]
+            if func_id in var_dict:
+                raise SLUCSyntaxError("ERROR: Variable '{0}' declared on line {1} has already been declared".format(
+                    func_id, self.curr_token[2]))
+            else:
+                var_dict[func_id] = None
                 self.next_token()
-                return DeclarationExpr(dec_type, id)
+                id = IDExpr(tmp[1])
+                if self.curr_token[1] == Lexer.SEMICOLON.value:
+                    self.next_token()
+                    return DeclarationExpr(dec_type, id)
 
         return False
 
@@ -101,17 +111,17 @@ class Parser:
         else:
             return False
 
-    def statements(self):
+    def statements(self, var_dict):
         statement_list = []
-        curr_statement = self.statement()
+        curr_statement = self.statement(var_dict)
         while curr_statement:
             if self.curr_token[1] == Lexer.SEMICOLON.value:
                 self.next_token()
             statement_list.append(curr_statement)
-            curr_statement = self.statement()
+            curr_statement = self.statement(var_dict)
         return Statements(statement_list)
 
-    def statement(self):
+    def statement(self, var_dict):
         # get the id of the token
         current_token = self.curr_token[0][0]
         value = self.curr_token[1]
@@ -123,13 +133,13 @@ class Parser:
             self.next_token()
             return ';'
         if current_token == Lexer.LCBRAC.id:
-            return self.block()
+            return self.block(var_dict)
         elif current_token == Lexer.ID.id:
-            return self.assignment()
+            return self.assignment(var_dict)
         elif current_token == Lexer.IF.id:
-            return self.if_stmt()
+            return self.if_stmt(var_dict)
         elif current_token == Lexer.WHILE.id:
-            return self.while_statement()
+            return self.while_statement(var_dict)
         elif current_token == Lexer.PRINT.id:
             return self.print_statement()
         elif current_token == Lexer.RET.id:
@@ -143,27 +153,33 @@ class Parser:
         if self.curr_token[0][0] == Lexer.SEMICOLON.id:
             self.next_token()
             return ReturnStmt(curr_expr)
-        raise SLUCSyntaxError("Invalid return statement on line {0}".format(self.curr_token[2]))
+        raise SLUCSyntaxError("ERROR: Invalid return statement on line {0}".format(self.curr_token[2]))
 
-    def block(self):
+    def block(self, var_dict):
         self.next_token()
-        block_content = self.statements()
+        block_content = self.statements(var_dict)
         if self.curr_token[0][0] == Lexer.RCBRAC.id:
             self.next_token()
             return Block(block_content)
         else:
             raise SLUCSyntaxError("ERROR: Missing closing curly brace on line {0}".format(self.curr_token[2]))
 
-    def assignment(self):
+    def assignment(self, var_dict):
         curr_id = self.curr_token[1]
-        self.next_token()
-        if self.curr_token[0][0] == Lexer.EQ.id:
+        if curr_id not in var_dict:
+            raise SLUCSyntaxError("ERROR: Variable '{0}' used on line {1} is not defined".format(
+                curr_id, self.curr_token[2]))
+        else:
             self.next_token()
-            return AssignStmt(IDExpr(curr_id), self.expression())
+            if self.curr_token[0][0] == Lexer.EQ.id:
+                self.next_token()
+                curr_expr = self.expression()
+                var_dict[curr_id] = curr_expr
+                return AssignStmt(IDExpr(curr_id), curr_expr)
 
         raise SLUCSyntaxError("Invalid assignment statement on line {0}".format(self.curr_token[2]))
 
-    def if_stmt(self):
+    def if_stmt(self, var_dict):
         # if ( Expression ) Statement [ else Statement ]
         if self.curr_token[0][0] == Lexer.IF.id:
             self.next_token()
@@ -172,18 +188,18 @@ class Parser:
                 condition = self.expression()
                 if self.curr_token[0][0] == Lexer.RPAREN.id:
                     self.next_token()
-                    true_part = self.statement()
+                    true_part = self.statement(var_dict)
                     false_part = None
                     self.next_token()
                     while self.curr_token[0][0] == Lexer.ELSE.id:
                         self.next_token()
-                        false_part = self.statement()
+                        false_part = self.statement(var_dict)
                     return IfStmt(condition, true_part, (false_part if false_part else None))
                 else:
                     raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.curr_token[2]))
         raise SLUCSyntaxError("ERROR: Invalid if statement on line {0}".format(self.curr_token[2]))
 
-    def while_statement(self):
+    def while_statement(self, var_dict):
         if self.curr_token[0][0] == Lexer.WHILE.id:
             self.next_token()
         if self.curr_token[0][0] == Lexer.LPAREN.id:
@@ -191,7 +207,7 @@ class Parser:
             while_expr = self.expression()
             if self.curr_token[0][0] == Lexer.RPAREN.id:
                 self.next_token()
-                while_statement = self.statement()
+                while_statement = self.statement(var_dict)
                 return WhileStmt(while_expr, while_statement)
             else:
                 raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.curr_token[2]))
@@ -224,7 +240,6 @@ class Parser:
             # return string_lit_expr(self.curr_token[1]) ????
         else:
             return self.expression()
-
 
     def expression(self):
         left = self.conjunction()
