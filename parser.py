@@ -131,7 +131,7 @@ class Parser:
             return self.while_statement()
         elif current_token == Lexer.PRINT.id:
             return self.print_statement()
-        elif self.curr_token[1] == 'return':
+        elif current_token == Lexer.RET.id:
             return self.return_stmt()
         else:
             print(self.curr_token)
@@ -189,11 +189,11 @@ class Parser:
             self.next_token()
         if self.curr_token[0][0] == Lexer.LPAREN.id:
             self.next_token()
-            self.expression()
+            while_expr = self.expression()
             if self.curr_token[0][0] == Lexer.RPAREN.id:
                 self.next_token()
-                self.statements()
-                # self.next_token() TODO: does this go here?
+                while_statement = self.statement()
+                return WhileStmt(while_expr, while_statement)
             else:
                 raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.curr_token[2]))
         else:

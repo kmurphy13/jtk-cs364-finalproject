@@ -56,6 +56,7 @@ class Lexer:
     MOD = Token(39, '%', 'modulus')
     NOT = Token(40, '!', 'not')
     LOR = Token(41, '||', 'logical or')
+    RET = Token(42, 'return','keyword')
 
     # dictionary of singleton tokens
     singleton_dict = {
@@ -96,7 +97,8 @@ class Lexer:
         CHAR[1]: (CHAR[0], CHAR[2]),
         MAIN[1]: (MAIN[0], MAIN[2]),
         FLOAT[1]: (FLOAT[0], FLOAT[2]),
-        EOF[1]: (EOF[0], EOF[2])
+        EOF[1]: (EOF[0], EOF[2]),
+        RET[1]: (RET[0], RET[2])
     }
 
     split_patt = re.compile(
@@ -139,6 +141,7 @@ class Lexer:
            (\bint\b)    |    # keyword: int
            (\bmain\b)   |    # keyword: main
            (\bchar\b)   |   # keyword: int
+           (\breturn\b) |   # keyword: return 
            (//.*)       |   # comment
            ("(?:\\.|[^"\\])*")    
         """,
