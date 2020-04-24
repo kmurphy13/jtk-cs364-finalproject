@@ -141,15 +141,15 @@ class Parser:
         elif current_token == Lexer.WHILE.id:
             return self.while_statement(var_dict)
         elif current_token == Lexer.PRINT.id:
-            return self.print_statement()
+            return self.print_statement(var_dict)
         elif current_token == Lexer.RET.id:
-            return self.return_stmt()
+            return self.return_stmt(var_dict)
         else:
             return False
 
-    def return_stmt(self):
+    def return_stmt(self, var_dict):
         self.next_token()
-        curr_expr = self.expression()
+        curr_expr = self.expression(var_dict)
         if self.curr_token[0][0] == Lexer.SEMICOLON.id:
             self.next_token()
             return ReturnStmt(curr_expr)
@@ -173,7 +173,7 @@ class Parser:
             self.next_token()
             if self.curr_token[0][0] == Lexer.EQ.id:
                 self.next_token()
-                curr_expr = self.expression()
+                curr_expr = self.expression(var_dict)
                 var_dict[curr_id] = curr_expr
                 return AssignStmt(IDExpr(curr_id), curr_expr)
 
@@ -185,7 +185,7 @@ class Parser:
             self.next_token()
             if self.curr_token[0][0] == Lexer.LPAREN.id:
                 self.next_token()
-                condition = self.expression()
+                condition = self.expression(var_dict)
                 if self.curr_token[0][0] == Lexer.RPAREN.id:
                     self.next_token()
                     true_part = self.statement(var_dict)
@@ -204,7 +204,7 @@ class Parser:
             self.next_token()
         if self.curr_token[0][0] == Lexer.LPAREN.id:
             self.next_token()
-            while_expr = self.expression()
+            while_expr = self.expression(var_dict)
             if self.curr_token[0][0] == Lexer.RPAREN.id:
                 self.next_token()
                 while_statement = self.statement(var_dict)
@@ -214,16 +214,16 @@ class Parser:
         else:
             raise SLUCSyntaxError("ERROR: Missing left paren on line {0}".format(self.curr_token[2]))
 
-    def print_statement(self):
+    def print_statement(self, var_dict):
         if self.curr_token[0][0] == Lexer.PRINT.id:
             self.next_token()
         if self.curr_token[0][0] == Lexer.LPAREN.id:
             self.next_token()
             print_arguments = []
-            print_arguments.append(self.print_arg())
+            print_arguments.append(self.print_arg(var_dict))
             while self.curr_token[0][0] in {Lexer.COMMA.id}:
                 self.next_token()
-                print_arguments.append(self.print_arg())
+                print_arguments.append(self.print_arg(var_dict))
             if self.curr_token[0][0] == Lexer.RPAREN.id:
                 self.next_token()
                 return PrintStmt(print_arguments)
@@ -232,90 +232,94 @@ class Parser:
         else:
             raise SLUCSyntaxError("ERROR: Missing left paren on line {0}".format(self.curr_token[2]))
 
-    def print_arg(self):
+    def print_arg(self, var_dict):
         if self.curr_token[0][0] == Lexer.STRING.id:
             tmp = self.curr_token[1]
             self.next_token()
             return StringLitExpr(tmp)
             # return string_lit_expr(self.curr_token[1]) ????
         else:
-            return self.expression()
+            return self.expression(var_dict)
 
-    def expression(self):
-        left = self.conjunction()
+    def expression(self, var_dict):
+        left = self.conjunction(var_dict)
         while self.curr_token[0][0] in {Lexer.LOR.id}:
             self.next_token()
-            right = self.conjunction()
+            right = self.conjunction(var_dict)
             left = BinaryExpr(left, right, "||")
         return left
 
-    def conjunction(self):
-        left = self.equality()
+    def conjunction(self, var_dict):
+        left = self.equality(var_dict)
         while self.curr_token[0][0] in {Lexer.LAND.id}:
             self.next_token()
-            right = self.equality()
+            right = self.equality(var_dict)
             left = BinaryExpr(left, right, "&&")
         return left
 
-    def equality(self):  # a == b      3*z != 99
-        left = self.relation()
+    def equality(self, var_dict):  # a == b      3*z != 99
+        left = self.relation(var_dict)
         while self.curr_token[0][0] in {Lexer.EQUAL.id, Lexer.NEQUAL.id}:
             op = self.curr_token[1]
             self.next_token()
-            right = self.relation()
+            right = self.relation(var_dict)
             left = BinaryExpr(left, right, op)
         return left
 
-    def relation(self):  # a < b
-        left = self.addition()
+    def relation(self, var_dict):  # a < b
+        left = self.addition(var_dict)
         while self.curr_token[0][0] in {Lexer.LT.id, Lexer.LEQ.id, Lexer.GT.id, Lexer.GEQ}:
             op = self.curr_token[1]
             self.next_token()
-            right = self.addition()
+            right = self.addition(var_dict)
             left = BinaryExpr(left, right, op)
         return left
 
-    def addition(self) -> Expr:
+    def addition(self, var_dict) -> Expr:
         """
         Term  →  Term { + Term }
         """
 
-        left = self.term()
+        left = self.term(var_dict)
 
         while self.curr_token[0][0] in { Lexer.PLUS.id, Lexer.MINUS.id }:
             operation = self.curr_token[1]
             self.next_token()  # advance to the next token
-            right = self.term()
+            right = self.term(var_dict)
             left = BinaryExpr(left, right, operation)
 
         return left
 
-    def term(self) -> Expr:
-        left = self.fact()
+    def term(self, var_dict) -> Expr:
+        left = self.fact(var_dict)
 
         while self.curr_token[0][0] in {Lexer.MULT.id, Lexer.DIV.id, Lexer.MOD.id}:
             operation = self.curr_token[1]
             self.next_token()
-            right = self.fact()
+            right = self.fact(var_dict)
             left = BinaryExpr(left, right, operation)
 
         return left
 
-    def fact(self) -> Expr:
+    def fact(self, var_dict) -> Expr:
         # only advance to the next token on a successful match.
         if self.curr_token[0][0] == Lexer.MINUS.id:
             self.next_token()
-            tree = self.primary()
+            tree = self.primary(var_dict)
             return UnaryMinus(tree)
 
-        return self.primary()
+        return self.primary(var_dict)
 
-    def primary(self) -> Expr:
+    def primary(self, var_dict) -> Expr:
         # parse an ID
         if self.curr_token[0][0] == Lexer.ID.id:
             tmp = self.curr_token
             self.next_token()
-            return IDExpr(tmp[1])
+            if tmp[1] in var_dict:
+                return IDExpr(tmp[1])
+            else:
+                raise SLUCSyntaxError("ERROR: Variable '{0}' used on line {1} is not defined".format(
+                    tmp[1], self.curr_token[2]))
 
         # parse an integer literal
         if self.curr_token[0][0] == Lexer.INT.id:
