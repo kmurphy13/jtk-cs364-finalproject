@@ -118,11 +118,11 @@ class Statements:
         self.statement_list = statement_list
 
     def __str__(self):
-        output = ''
+        output = '\t'
         if self.statement_list:
             output += str(self.statement_list[0])
             for arg in self.statement_list[1:]:
-                output += ('\n' + str(arg))
+                output += ('\n\t' + str(arg))
         return output
 
 
@@ -131,15 +131,8 @@ class Block(Stmt):
         self.stmts = stmts
 
     def __str__(self):
-        return "{\n\t" + str(self.stmts) + "\n\t}"
+        return "{\n" + str(self.stmts) + "\n\t}"
 
-
-class ReturnStmt(Stmt):
-    def __init__(self, ret_val: Expr):
-        self.ret_val = ret_val
-
-    def __str__(self):
-        return "return " + str(self.ret_val) + ";"
 
 
 class IfStmt(Stmt):
@@ -150,9 +143,9 @@ class IfStmt(Stmt):
 
     def __str__(self):
         if self.false_part:
-            return '\tif (' + str(self.cond) + ')\n\t\t' + str(self.true_part) + '\n\telse\n\t\t' + str(self.false_part) + '\n'
+            return 'if (' + str(self.cond) + ')\n\t\t' + str(self.true_part) + '\n\telse\n\t\t' + str(self.false_part) + '\n'
         else:
-            return '\tif (' + str(self.cond) + ') \n\t\t' + str(self.true_part) + '\n'
+            return 'if (' + str(self.cond) + ') \n\t' + str(self.true_part) + '\n'
 
 
 class PrintStmt(Stmt):
@@ -160,7 +153,7 @@ class PrintStmt(Stmt):
         self.print_args = print_args
 
     def __str__(self):
-        output = '\tprint('
+        output = 'print('
         if self.print_args:
             output += str(self.print_args[0])
             for arg in self.print_args[1:]:
@@ -182,7 +175,7 @@ class WhileStmt(Stmt):
         self.statement = while_statement
 
     def __str__(self):
-        return '\twhile ' + "("+ str(self.expr) + ")" + str(self.statement)
+        return 'while ' + "("+ str(self.expr) + ")" + str(self.statement)
 
 
 class AssignStmt(Stmt):
@@ -191,7 +184,7 @@ class AssignStmt(Stmt):
         self.assign_expression = assign_expression
 
     def __str__(self):
-        return "\t" + str(self.assign_id) + " = " + str(self.assign_expression) + ";"
+        return str(self.assign_id) + " = " + str(self.assign_expression) + ";"
 
 
 class ParamExpr(Expr):
