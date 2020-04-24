@@ -43,6 +43,10 @@ class Parser:
                     if self.curr_token[1] == Lexer.RCBRAC.value:
                         self.next_token()
                         return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
+                    else:
+                        raise SLUCSyntaxError("Missing closing curly bracket on line {0}".format(self.curr_token[2]))
+                else:
+                    raise SLUCSyntaxError("Missing opening curly bracket on line {0}".format(self.curr_token[2]))
         else:
             return False
 
@@ -164,7 +168,7 @@ class Parser:
             self.next_token()
             return Block(block_content)
         else:
-            raise SLUCSyntaxError("ERROR: Missing closing curly brace on line {0}".format(self.curr_token[2]))
+            raise SLUCSyntaxError("ERROR: Missing closing curly bracket on line {0}".format(self.curr_token[2]))
 
     def assignment(self, var_dict):
         curr_id = self.curr_token[1]

@@ -118,11 +118,11 @@ class Statements:
         self.statement_list = statement_list
 
     def __str__(self):
-        output = ''
+        output = '\t'
         if self.statement_list:
             output += str(self.statement_list[0])
             for arg in self.statement_list[1:]:
-                output += ('\n' + str(arg))
+                output += ('\n\t' + str(arg))
         return output
 
 
@@ -131,7 +131,7 @@ class Block(Stmt):
         self.stmts = stmts
 
     def __str__(self):
-        return "{\n\t" + str(self.stmts) + "\n}"
+        return "{\n\t" + str(self.stmts) + "\n\t}"
 
 
 class ReturnStmt(Stmt):
@@ -150,9 +150,9 @@ class IfStmt(Stmt):
 
     def __str__(self):
         if self.false_part:
-            return 'if (' + str(self.cond) + ') ' + str(self.true_part) + ' else ' + str(self.false_part) + '\n'
+            return 'if (' + str(self.cond) + ') \n\t\t\t' + str(self.true_part) + '\n\t\telse\n\t\t\t' + str(self.false_part) + '\n'
         else:
-            return 'if (' + str(self.cond) + ') ' + str(self.true_part) + '\n'
+            return 'if (' + str(self.cond) + ') \n\t\t\t' + str(self.true_part) + '\n'
 
 
 class PrintStmt(Stmt):
@@ -182,7 +182,7 @@ class WhileStmt(Stmt):
         self.statement = while_statement
 
     def __str__(self):
-        return 'while ' + "("+ str(self.expr) + ")" ' ' + str(self.statement)
+        return 'while ' + "("+ str(self.expr) + ")" + str(self.statement)
 
 
 class AssignStmt(Stmt):
@@ -191,7 +191,7 @@ class AssignStmt(Stmt):
         self.assign_expression = assign_expression
 
     def __str__(self):
-        return str(self.assign_id) + "=" + str(self.assign_expression) + ";"
+        return str(self.assign_id) + " = " + str(self.assign_expression) + ";"
 
 
 class ParamExpr(Expr):
@@ -230,9 +230,9 @@ class Declarations:
         self.dec_list = dec_list
 
     def __str__(self):
-        output = ''
+        output = '\t'
         for dec in self.dec_list:
-            output += str(dec) + '\n'
+            output += str(dec) + '\n\t'
         return output
 
 
@@ -281,33 +281,4 @@ class SLUCTypeError(Exception):
 
 
 if __name__ == '__main__':
-
-    while_stmt = WhileStmt(
-        BinaryExpr(IDExpr("a"), IDExpr("b"), "<"),
-        Block(Statements([AssignStmt(IDExpr("a"), BinaryExpr(IDExpr("a"), IDExpr("b"), "+"))]))
-    )
-
-    print_stmt = PrintStmt([StringLitExpr("Kira"), BinaryExpr(IDExpr("a"), IDExpr("b"), "+")])
-
-    return_stmt = ReturnStmt(BinaryExpr(IDExpr("a"), IDExpr("b"), "<"))
-
-    declarations_test = Declarations([DeclarationExpr('int', 'b'), DeclarationExpr('bool', 'c')])
-
-    if_stmt = IfStmt(
-        BinaryExpr(IDExpr("a"), IDExpr("b"), "<"),
-        Block(Statements([AssignStmt(IDExpr("a"), BinaryExpr(IDExpr("a"), IDExpr("b"), "+"))])),
-        Block(Statements([AssignStmt(IDExpr("a"), BinaryExpr(IDExpr("a"), IDExpr("b"), "+"))]))
-    )
-
-    params_test = Params([ParamExpr('int', 'a'), ParamExpr('bool', 'd')])
-    statements_test = Statements([if_stmt, print_stmt, return_stmt])
-
-    expr = Program([FunctionDef(
-        'bool',
-        IDExpr('a_function'),
-        params_test,
-        declarations_test,
-        statements_test
-    )])
-
-    print(expr)
+    pass
