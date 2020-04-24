@@ -1,3 +1,4 @@
+// Test #1 Euler project problem 1
 int sum_3_or_5(int n) {
  int sum;
  int i;
@@ -6,13 +7,14 @@ int sum_3_or_5(int n) {
  while (i < n) {
  if (i % 3 == 0 || i % 5 == 0)
  sum = sum + i;
- else i = i + 1;
+ else sum = 0;
+
+ i = i + 1;
  }
  return sum;
 }
-
 int main() {
-print("Kira", 4+5)
+ print("The answer is: ", 1000, "Woot!");
 }
 // Test #2 A program that determines if
 // a number n is prime
@@ -28,5 +30,5 @@ int main() {
  prime = false;
  i = i + 1;
  }
-
+ print(i-1);
 }

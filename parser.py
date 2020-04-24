@@ -201,7 +201,6 @@ class Parser:
             self.next_token()
             print_arguments = []
             print_arguments.append(self.print_arg())
-            self.next_token()
             while self.curr_token[0][0] in {Lexer.COMMA.id}:
                 self.next_token()
                 print_arguments.append(self.print_arg())
@@ -215,11 +214,13 @@ class Parser:
 
     def print_arg(self):
         if self.curr_token[0][0] == Lexer.STRING.id:
-            return StringLitExpr(self.curr_token[1])
+            tmp = self.curr_token[1]
+            self.next_token()
+            return StringLitExpr(tmp)
             # return string_lit_expr(self.curr_token[1]) ????
         else:
             return self.expression()
-            self.next_token()
+
 
     def expression(self):
         left = self.conjunction()
