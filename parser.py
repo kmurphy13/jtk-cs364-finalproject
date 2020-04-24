@@ -24,7 +24,7 @@ class Parser:
 
     def function_def(self):
         func_type = self.type()
-        if self.curr_token[0][0] == Lexer.ID.id:
+        if self.curr_token[0][0] == Lexer.ID.id or self.curr_token[0][0]==Lexer.MAIN.id:
             tmp = self.curr_token
             # TODO check to make sure ID is declared (in the dictionary)
             func_id = IDExpr(tmp[1])

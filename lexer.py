@@ -106,7 +106,7 @@ class Lexer:
            \s     |        #  whitespace
            ((?<!\de)\+)   |        #  operator: plus
            (\*)   |        #  operator: times
-           (^/$)  |        #  operator: divide
+           (/(?!/))  |        #  operator: divide
            ((?<!\de)-)    |        #  operator: subtract 
            (<<)   |        #  operator: bitshift left
            (>>)   |        #  operator: bitshift right
