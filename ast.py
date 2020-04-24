@@ -174,7 +174,7 @@ class WhileStmt(Stmt):
         self.statement = while_statement
 
     def __str__(self):
-        return 'while ' + str(self.expr) + ' ' + str(self.statement)
+        return 'while ' + "("+ str(self.expr) + ")" ' ' + str(self.statement)
 
 
 class AssignStmt(Stmt):

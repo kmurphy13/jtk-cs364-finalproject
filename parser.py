@@ -250,7 +250,7 @@ class Parser:
     def relation(self):  # a < b
         left = self.addition()
         while self.curr_token[0][0] in {Lexer.LT.id, Lexer.LEQ.id, Lexer.GT.id, Lexer.GEQ}:
-            op = self.curr_token[0][0]
+            op = self.curr_token[1]
             self.next_token()
             right = self.addition()
             left = BinaryExpr(left, right, op)
