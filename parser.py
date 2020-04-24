@@ -1,3 +1,5 @@
+import sys
+
 from lexer import Lexer
 from ast import *
 
@@ -371,6 +373,10 @@ class SLUCSyntaxError(Exception):
 
 
 if __name__ == '__main__':
-    p = Parser('simple.c')
+    # p = Parser('parserfile.c')
+    p = Parser(sys.argv[1])
     t = p.program()
+    file = open('parserfile.c', 'w')
+    file.write(str(t))
+    file.close()
     print(t)
