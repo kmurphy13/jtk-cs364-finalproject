@@ -199,13 +199,15 @@ class Parser:
             self.next_token()
         if self.curr_token[0][0] == Lexer.LPAREN.id:
             self.next_token()
-            self.print_arg()
+            print_arguments = []
+            print_arguments.append(self.print_arg())
             self.next_token()
             while self.curr_token[0][0] in {Lexer.COMMA.id}:
                 self.next_token()
-                self.print_arg()
+                print_arguments.append(self.print_arg())
             if self.curr_token[0][0] == Lexer.RPAREN.id:
                 self.next_token()
+                return PrintStmt(print_arguments)
             else:
                 raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.curr_token[2]))
         else:
@@ -213,10 +215,10 @@ class Parser:
 
     def print_arg(self):
         if self.curr_token[0][0] == Lexer.STRING.id:
-            pass
+            return StringLitExpr(self.curr_token[1])
             # return string_lit_expr(self.curr_token[1]) ????
         else:
-            self.expression()
+            return self.expression()
             self.next_token()
 
     def expression(self):

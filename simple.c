@@ -12,7 +12,7 @@ int sum_3_or_5(int n) {
 }
 
 int main() {
-
+print("Kira", 4+5)
 }
 // Test #2 A program that determines if
 // a number n is prime
