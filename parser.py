@@ -18,7 +18,7 @@ class Parser:
         functions = []
         curr_func = self.function_def()
         while curr_func:
-            functions.append(FunctionDef(curr_func))
+            functions.append(curr_func)
             curr_func = self.function_def()
         return Program(functions)
 
@@ -32,13 +32,10 @@ class Parser:
             if self.curr_token[1] == Lexer.LPAREN.value:
                 self.next_token()
                 func_params = self.params()
-                print("Params " + str(func_params))
                 if self.curr_token[1] == Lexer.LCBRAC.value:
                     self.next_token()
                     func_decls = self.declarations()
-                    print("decls " + str(func_decls))
                     func_stmts = self.statements()
-                    print("stmts " + str(func_stmts))
                     if self.curr_token[1] == Lexer.RCBRAC.value:
                         self.next_token()
                         return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
@@ -134,7 +131,6 @@ class Parser:
         elif current_token == Lexer.RET.id:
             return self.return_stmt()
         else:
-            print(self.curr_token)
             return False
 
     def return_stmt(self):
