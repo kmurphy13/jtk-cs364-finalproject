@@ -71,7 +71,7 @@ class FloatLitExpr(Expr):
 
 class BoolExpr(Expr):
     def __init__(self, bool_val: str):
-        self.bool_val = (bool_val == 'True')
+        self.bool_val = bool_val.lower()
 
     def __str__(self):
         return str(self.bool_val)
@@ -118,11 +118,11 @@ class Statements:
         self.statement_list = statement_list
 
     def __str__(self):
-        output = '\t'
+        output = ''
         if self.statement_list:
             output += str(self.statement_list[0])
             for arg in self.statement_list[1:]:
-                output += ('\n\t' + str(arg))
+                output += ('\n' + str(arg))
         return output
 
 
@@ -150,9 +150,9 @@ class IfStmt(Stmt):
 
     def __str__(self):
         if self.false_part:
-            return 'if (' + str(self.cond) + ') \n\t\t\t' + str(self.true_part) + '\n\t\telse\n\t\t\t' + str(self.false_part) + '\n'
+            return '\tif (' + str(self.cond) + ')\n' + str(self.true_part) + '\n\telse\n\t\t' + str(self.false_part) + '\n'
         else:
-            return 'if (' + str(self.cond) + ') \n\t\t\t' + str(self.true_part) + '\n'
+            return '\tif (' + str(self.cond) + ') \n\t\t' + str(self.true_part) + '\n'
 
 
 class PrintStmt(Stmt):
@@ -182,7 +182,7 @@ class WhileStmt(Stmt):
         self.statement = while_statement
 
     def __str__(self):
-        return 'while ' + "("+ str(self.expr) + ")" + str(self.statement)
+        return '\twhile ' + "("+ str(self.expr) + ")" + str(self.statement)
 
 
 class AssignStmt(Stmt):
@@ -191,7 +191,7 @@ class AssignStmt(Stmt):
         self.assign_expression = assign_expression
 
     def __str__(self):
-        return str(self.assign_id) + " = " + str(self.assign_expression) + ";"
+        return "\t" + str(self.assign_id) + " = " + str(self.assign_expression) + ";"
 
 
 class ParamExpr(Expr):
