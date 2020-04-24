@@ -150,9 +150,9 @@ class IfStmt(Stmt):
 
     def __str__(self):
         if self.false_part:
-            return '\tif (' + str(self.cond) + ')\n' + str(self.true_part) + '\n\telse\n\t\t' + str(self.false_part) + '\n'
+            return '\tif (' + str(self.cond) + ')\n\t\t' + str(self.true_part) + '\n\telse\n\t\t' + str(self.false_part) + '\n'
         else:
-            return '\tif (' + str(self.cond) + ') \n\t' + str(self.true_part) + '\n'
+            return '\tif (' + str(self.cond) + ') \n\t\t' + str(self.true_part) + '\n'
 
 
 class PrintStmt(Stmt):
