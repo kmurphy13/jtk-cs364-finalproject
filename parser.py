@@ -135,8 +135,6 @@ class Parser:
             return self.return_stmt()
         else:
             print(self.curr_token)
-            self.next_token()
-
             return False
 
     def return_stmt(self):
@@ -243,7 +241,7 @@ class Parser:
     def equality(self):  # a == b      3*z != 99
         left = self.relation()
         while self.curr_token[0][0] in {Lexer.EQUAL.id, Lexer.NEQUAL.id}:
-            op = self.curr_token[0][0]
+            op = self.curr_token[1]
             self.next_token()
             right = self.relation()
             left = BinaryExpr(left, right, op)
