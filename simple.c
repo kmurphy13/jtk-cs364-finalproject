@@ -17,7 +17,7 @@ int sum_3_or_5(int n) {
 
 int main() {
  if (1==2)
- print("The answer is: ", 1000, "Woot!");
+ print("The answer is: ", 1000 , "Woot!");
  else
  print(4)
 }

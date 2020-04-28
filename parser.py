@@ -412,7 +412,7 @@ class Parser:
         # parse a parenthesized expression
         if self.curr_token[0][0] == Lexer.LPAREN.id:
             self.next_token()
-            tree = self.expression()
+            tree = self.expression(var_dict)
             if self.curr_token[0][0] == Lexer.RPAREN.id:
                 self.next_token()
                 return tree
@@ -435,10 +435,6 @@ class SLUCSyntaxError(Exception):
 
 
 if __name__ == '__main__':
-    # p = Parser('parserfile.c')
     p = Parser(sys.argv[1])
     t = p.program()
-    file = open('parserfile.c', 'w')
-    file.write(str(t))
-    file.close()
     print(t)
