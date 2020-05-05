@@ -158,24 +158,23 @@ class Parser:
         current_token = self.curr_token[0][0]
         value = self.curr_token[1]
         # Check through the possible values for statement
+        statedict = {
+            Lexer.LCBRAC.id: self.block,
+            Lexer.ID.id: self.assignment,
+            Lexer.IF.id: self.if_stmt,
+            Lexer.WHILE.id: self.while_statement,
+            Lexer.PRINT.id: self.print_statement,
+            Lexer.RET.id: self.return_stmt
+        }
+
         if current_token == Lexer.SEMICOLON.id:
             self.next_token()
             return ';'
-        if current_token == Lexer.LCBRAC.id:
-            return self.block(var_dict)
-        elif current_token == Lexer.ID.id:
-            return self.assignment(var_dict)
-        elif current_token == Lexer.IF.id:
-            return self.if_stmt(var_dict)
-        elif current_token == Lexer.WHILE.id:
-            return self.while_statement(var_dict)
-        elif current_token == Lexer.PRINT.id:
-            return self.print_statement(var_dict)
-        elif current_token == Lexer.RET.id:
-            return self.return_stmt(var_dict)
+        if current_token in statedict.keys():
+            return statedict[current_token](var_dict)
         else:
             return False
-
+        
     def return_stmt(self, var_dict):
         """
         ReturnStmt → return Expression ;
