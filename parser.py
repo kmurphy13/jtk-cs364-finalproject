@@ -21,17 +21,19 @@ class Parser:
         Program → { FunctionDef }
         """
         functions = []
-        curr_func = self.function_def()
+        func_dict = {}
+        curr_func = self.function_def(func_dict)
         while curr_func:
             functions.append(curr_func)
-            curr_func = self.function_def()
+            curr_func = self.function_def(func_dict)
+            func_dict[curr_func.func_id] = curr_func
         return Program(functions)
 
-    def function_def(self):
+    def function_def(self, func_dict):
         """
         FunctionDef → Type id ( Params ) { Declarations Statements }
         """
-        var_dict = {}
+        var_dict = {x:func_dict[x] for x in func_dict}
 
         func_type = self.type()
         if self.curr_token[0][0] == Lexer.ID.id or self.curr_token[0][0] == Lexer.MAIN.id:
@@ -50,7 +52,8 @@ class Parser:
                     func_stmts = self.statements(var_dict)
                     if self.curr_token[1] == Lexer.RCBRAC.value:
                         self.next_token()
-                        return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts)
+                        return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts).eval(var_dict)
+
                     else:
                         raise SLUCSyntaxError("Missing closing curly bracket on line {0}".format(self.curr_token[2]))
                 else:
@@ -329,7 +332,7 @@ class Parser:
         Relation → Addition [ RelOp Addition ]
         """
         left = self.addition(var_dict)
-        while self.curr_token[0][0] in {Lexer.LT.id, Lexer.LEQ.id, Lexer.GT.id, Lexer.GEQ}:
+        if self.curr_token[0][0] in {Lexer.LT.id, Lexer.LEQ.id, Lexer.GT.id, Lexer.GEQ}:
             op = self.curr_token[1]
             self.next_token()
             right = self.addition(var_dict)
@@ -386,9 +389,8 @@ class Parser:
             self.next_token()
             if tmp[1] in var_dict:
                 return IDExpr(tmp[1])
-            else:
-                raise SLUCSyntaxError("ERROR: Variable '{0}' used on line {1} is not defined".format(
-                    tmp[1], self.curr_token[2]))
+            raise SLUCSyntaxError("ERROR: Variable '{0}' used on line {1} is not defined".format(
+                tmp[1], self.curr_token[2]))
 
         # parse an integer literal
         if self.curr_token[0][0] == Lexer.INT.id:
@@ -435,9 +437,8 @@ class SLUCSyntaxError(Exception):
 
 if __name__ == '__main__':
     try:
-        p = Parser("test0.c")
+        p = Parser("newtest.c")
         t = p.program()
-        print(t)
     except SLUCSyntaxError as e:
         print(e)
 

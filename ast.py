@@ -7,8 +7,9 @@ class Expr:
     """
     Base class for expressions
     """
-    def eval(self):
-        self.eval()
+
+    def eval(self, env: Optional[dict]):
+        pass
 
 
 class UnaryMinus(Expr):
@@ -21,8 +22,8 @@ class UnaryMinus(Expr):
     def __str__(self):
         return "-({0})".format(str(self.tree))
 
-    def eval(self):
-        return -self.tree.eval()
+    def eval(self, env):
+        return -self.tree.eval(env)
 
 
 class IDExpr(Expr):
@@ -32,13 +33,13 @@ class IDExpr(Expr):
     def __init__(self, identifier: str):
         self.id = identifier
 
+
     def __str__(self):
         return self.id
 
-    # def eval(self, env):  # a + 7
-    #     # lookup the value of self.id. Look up where?
-    #     # env is a dictionary
-    #     pass
+    def eval(self, env):  # a + 7
+    # lookup the value of self.id. Look up where?
+        return env[self.id].eval(env)
 
 
 class StringLitExpr(Expr):
@@ -51,6 +52,9 @@ class StringLitExpr(Expr):
     def __str__(self):
         return self.string_lit
 
+    def eval(self, env):
+        return str(self.string_lit)
+
 
 class IntLitExpr(Expr):
     """
@@ -61,6 +65,9 @@ class IntLitExpr(Expr):
 
     def __str__(self):
         return str(self.int_lit)
+
+    def eval(self,env):
+        return int(self.int_lit)
 
 
 class FloatLitExpr(Expr):
@@ -73,6 +80,9 @@ class FloatLitExpr(Expr):
     def __str__(self):
         return str(self.float_lit)
 
+    def eval(self, env):
+        return float(self.float_lit)
+
 
 class BoolExpr(Expr):
     """
@@ -84,6 +94,8 @@ class BoolExpr(Expr):
     def __str__(self):
         return str(self.bool_val)
 
+    def eval(self,env):
+        return bool(self.bool_val)
 
 class BinaryExpr(Expr):
     """
@@ -100,9 +112,9 @@ class BinaryExpr(Expr):
     def __str__(self):
         return "(" + str(self.left) + " " + str(self.op) + " " + str(self.right) + ")"
 
-    def eval(self) -> Union[int, float]:
-        l = self.left.eval()
-        r = self.right.eval()
+    def eval(self,env) -> Union[int, float]:
+        l = self.left.eval(env)
+        r = self.right.eval(env)
         opdict = {
             '+': operator.add(l, r),
             '-': operator.sub(l, r),
@@ -129,8 +141,11 @@ class Stmt:
     def __str__(self):
         return self
 
+    def eval(self,env):
+        pass
 
-class Statements:
+
+class Statements():
     """
     Base class for a list of statements
     """
@@ -145,6 +160,10 @@ class Statements:
                 output += ('\n\t' + str(arg))
         return output
 
+    def eval(self,env):
+        for statement in self.statement_list:
+            statement.eval(env)
+
 
 class Block(Stmt):
     """
@@ -158,6 +177,9 @@ class Block(Stmt):
 
     def __str__(self):
         return "{\n" + str(self.stmts) + "\n\t}"
+
+    def eval(self,env):
+        return self.stmts.eval()
 
 
 class IfStmt(Stmt):
@@ -183,6 +205,14 @@ class IfStmt(Stmt):
         else:
             return 'if (' + str(self.cond) + ') \n\t\t' + str(self.true_part) + '\n'
 
+    def eval(self,env):
+        if self.cond.eval(env):
+            return self.true_part.eval(env)
+        elif self.false_part is not None:
+            return self.false_part.eval(env)
+
+
+
 
 class PrintStmt(Stmt):
     """
@@ -199,6 +229,12 @@ class PrintStmt(Stmt):
                 output += (', ' + str(arg))
         return output + ');'
 
+    def eval(self):
+        for arg in self.print_args:
+            print(arg.eval(), end = '')
+
+
+
 
 class ReturnStmt(Stmt):
     """
@@ -211,6 +247,9 @@ class ReturnStmt(Stmt):
 
     def __str__(self):
         return 'return ' + str(self.return_expr) + ';'
+
+    def eval(self,env):
+        return self.return_expr.eval()
 
 
 class WhileStmt(Stmt):
@@ -228,6 +267,12 @@ class WhileStmt(Stmt):
 
     def __str__(self):
         return 'while ' + "("+ str(self.expr) + ")" + str(self.statement)
+
+    def eval(self,env):
+        while(self.expr.eval(env)):
+            self.statement.eval(env)
+
+
 
 
 class AssignStmt(Stmt):
@@ -355,13 +400,12 @@ class FunctionDef:
         return self.func_type + ' ' + str(self.func_id) + "(" + str(self.params) + ") {\n" + str(self.decls) + \
                "\n" + str(self.stmts) + "\n}"
 
-    def eval(self, env) -> Union[int, float, bool]:
+    def eval(self, env):
         # an environment maps identifiers to values
         # parameters or local variables
         # to evaluate a function you evaluate all of the statements
         # within the environment
-        for s in self.stmts:
-            s.eval(env)
+        return self.stmts.eval(env)
 
 
 class Program:
@@ -379,6 +423,10 @@ class Program:
                 output += ('\n\n' + str(func))
         return output
 
+    def eval(self, env):
+        for func in self.funcs:
+            func.eval(env)
+
 
 class SLUCTypeError(Exception):
     """
@@ -393,4 +441,9 @@ class SLUCTypeError(Exception):
 
 
 if __name__ == '__main__':
+    #binexpr = BinaryExpr(IntLitExpr('5'), IntLitExpr('3'),'+')
+    #print(binexpr)
+
     pass
+    #printstmt = PrintStmt([StringLitExpr("The Answer to 5+3 is "), binexpr]).eval()
+
