@@ -11,20 +11,23 @@ class Expr:
 
 
 class UnaryMinus(Expr):
+    """
+    Adds a unary minus to an expression (-34567)
+    """
     def __init__(self, tree: Expr):
         self.tree = tree
 
     def __str__(self):
         return "-({0})".format(str(self.tree))
 
-    def scheme(self):
-        return "(- {0})".format(self.tree.scheme())
-
     def eval(self):
         return -self.tree.eval()
 
 
 class IDExpr(Expr):
+    """
+    Creates an instance of an identifier expression (the x in int x;)
+    """
     def __init__(self, identifier: str):
         self.id = identifier
 
@@ -37,7 +40,10 @@ class IDExpr(Expr):
     #     pass
 
 
-class FuncIDExpr(Expr):
+class FuncIDExpr:
+    """
+    Creates an instance of an function identifier (sum_3_or_5)
+    """
     def __init__(self, identifier: str):
         self.id = identifier
 
@@ -46,6 +52,9 @@ class FuncIDExpr(Expr):
 
 
 class StringLitExpr(Expr):
+    """
+    Creates an instance of a string literal expression ("Our team name is JTK")
+    """
     def __init__(self, string_lit: str):
         self.string_lit = string_lit
 
@@ -54,6 +63,9 @@ class StringLitExpr(Expr):
 
 
 class IntLitExpr(Expr):
+    """
+    Creates an instance of an integer literal expression (12345)
+    """
     def __init__(self, int_lit: str):
         self.int_lit = int(int_lit)
 
@@ -62,6 +74,9 @@ class IntLitExpr(Expr):
 
 
 class FloatLitExpr(Expr):
+    """
+    Creates an instance of a float literal expression (3.14159/1e-9)
+    """
     def __init__(self, float_lit: str):
         self.float_lit = float(float_lit)
 
@@ -70,6 +85,9 @@ class FloatLitExpr(Expr):
 
 
 class BoolExpr(Expr):
+    """
+    Creates an instance of a boolean expression (true/false)
+    """
     def __init__(self, bool_val: str):
         self.bool_val = bool_val.lower()
 
@@ -78,6 +96,12 @@ class BoolExpr(Expr):
 
 
 class BinaryExpr(Expr):
+    """
+    Base class for binary operation expressions
+    The operation passed to the __init__ can be +, -, *, /, %, <, <=, ==, !=, >=, >, ||, or &&
+    This operation is then used to put between the left and right expressions passed to __init__
+    BinaryExpr(7, 9, '*') evaluates to 7 * 9
+    """
     def __init__(self, left: Expr, right: Expr, op):
         self.left = left
         self.right = right
@@ -109,11 +133,17 @@ class BinaryExpr(Expr):
 
 
 class Stmt:
+    """
+    Base class for statement
+    """
     def __str__(self):
         return self
 
 
 class Statements:
+    """
+    Base class for a list of statements
+    """
     def __init__(self, statement_list: List[Stmt]):
         self.statement_list = statement_list
 
@@ -127,6 +157,12 @@ class Statements:
 
 
 class Block(Stmt):
+    """
+    Instance of a block
+    {
+     ....
+    }
+    """
     def __init__(self, stmts: Statements):
         self.stmts = stmts
 
@@ -134,8 +170,18 @@ class Block(Stmt):
         return "{\n" + str(self.stmts) + "\n\t}"
 
 
-
 class IfStmt(Stmt):
+    """
+    Instance of an if statement
+    :param cond: the condition checked by the if statement
+    :param true_part: the executable code if the condition is true
+    :param false_part: the executable code if the condition is false
+    if (cond) {
+        true_part
+    } else {
+        false_part
+    }
+    """
     def __init__(self, cond: Expr, true_part: Stmt, false_part: Optional[Stmt]):
         self.cond = cond
         self.true_part = true_part
@@ -149,6 +195,9 @@ class IfStmt(Stmt):
 
 
 class PrintStmt(Stmt):
+    """
+    Creates an instance of a print statement from a list of print arguments
+    """
     def __init__(self, print_args: List[Union[Expr, StringLitExpr]]):
         self.print_args = print_args
 
@@ -162,6 +211,11 @@ class PrintStmt(Stmt):
 
 
 class ReturnStmt(Stmt):
+    """
+    Creates an instance of a return statement
+    :param return_expr: What you are returning
+    return return_expr
+    """
     def __init__(self, return_expr: Expr):
         self.return_expr = return_expr
 
@@ -170,6 +224,14 @@ class ReturnStmt(Stmt):
 
 
 class WhileStmt(Stmt):
+    """
+    Creates an instance of a while statement
+    :param while_expr: the condition to check in order to keep evaluating the contents of the statement
+    :param while_statement: the contents of the while statement
+    while (while_expr) {
+        while_statement
+    }
+    """
     def __init__(self, while_expr: Expr, while_statement: Stmt):
         self.expr = while_expr
         self.statement = while_statement
@@ -179,6 +241,12 @@ class WhileStmt(Stmt):
 
 
 class AssignStmt(Stmt):
+    """
+    Creates an instance of an assignment statement
+    :param assign_id: the identifier that is being assigned
+    :param assign_expression: the value that the identifier is being assigned
+    assign_id = assign_expression
+    """
     def __init__(self, assign_id: IDExpr, assign_expression: Expr):
         self.assign_id = assign_id
         self.assign_expression = assign_expression
@@ -188,6 +256,13 @@ class AssignStmt(Stmt):
 
 
 class ParamExpr(Expr):
+    """
+    Creates an instance of a parameter expression
+    :param param_type: the data type of the parameter
+    :param param_id: the identifier of the parameter
+    param_type param_id
+    int x
+    """
     def __init__(self, param_type, param_id):
         self.param_type = param_type
         self.param_id = param_id
@@ -197,6 +272,11 @@ class ParamExpr(Expr):
 
 
 class Params:
+    """
+    Creates a list of ParamExprs that could be used for the parameters of a function definition
+    int print_birthday (int day, int month, int year) {
+    int day, int month, int year is the Params list
+    """
     def __init__(self, params_list: List[ParamExpr]):
         self.params = params_list
 
@@ -210,6 +290,13 @@ class Params:
 
 
 class DeclarationExpr:
+    """
+    Creates an instance of a declaration expression
+    :param dec_type: the data type of the variable declaration
+    :param dec_id: the identifier of the variable
+    dec_type dec_id;
+    int x;
+    """
     def __init__(self, dec_type, dec_id):
         self.type = dec_type
         self.id = dec_id
@@ -219,6 +306,15 @@ class DeclarationExpr:
 
 
 class Declarations:
+    """
+    Creates a list of DeclarationExprs that could be defined at the begging of a function
+    int print_birthday (int day, int month, int year) {
+        string name;
+        int age;
+
+    string name;
+    int age; is the Params list
+    """
     def __init__(self, dec_list: List[DeclarationExpr]):
         self.dec_list = dec_list
 
@@ -230,6 +326,34 @@ class Declarations:
 
 
 class FunctionDef:
+    """
+    Creates an instance of a function
+    :param func_type: the data type of the return value of the function
+    :param func_id: the identifier of the function
+    :param params: the list of parameters passed to the function
+    :param decls: the list of variable delarations at the beginning of the function
+    :param stmts: the list of statements that get evaluated after the declarations
+    func_type func_id (params) {
+        decls
+        stmts
+    }
+    int sum_3_or_5(int n) {
+        // decls
+        int sum;
+        int i;
+        // stmts
+        sum = 0;
+        i = 0;
+        while (i < 4) {
+            if (i % 3 == 0 || i % 5 == 0)
+                sum = sum + i;
+            else sum = 0;
+
+            i = i + 1;
+        }
+        return sum;
+    }
+    """
     def __init__(self, func_type: str, func_id: IDExpr, params: Params, decls: Declarations, stmts: Statements):
         self.func_type = func_type
         self.func_id = func_id
@@ -241,17 +365,19 @@ class FunctionDef:
         return self.func_type + ' ' + str(self.func_id) + "(" + str(self.params) + ") {\n" + str(self.decls) + \
                "\n" + str(self.stmts) + "\n}"
 
-    # def eval(self) -> Union[int, float, bool]:
-    #     # an environment maps identifiers to values
-    #     # parameters or local variables
-    #     # to evaluate a function you evaluate all of the statements
-    #     # within the environment
-    #     env = {}   # TODO Fix this
-    #     for s in self.stmts:
-    #         s.eval(env)  # TODO define environment
+    def eval(self, env) -> Union[int, float, bool]:
+        # an environment maps identifiers to values
+        # parameters or local variables
+        # to evaluate a function you evaluate all of the statements
+        # within the environment
+        for s in self.stmts:
+            s.eval(env)
 
 
 class Program:
+    """
+    Creates an instance of a program that is made up of a list of function definitions
+    """
     def __init__(self, funcs: Sequence[FunctionDef]):
         self.funcs = funcs
 
@@ -265,6 +391,9 @@ class Program:
 
 
 class SLUCTypeError(Exception):
+    """
+    Creates an instance of a SLUC Type Error
+    """
     def __init__(self, message: str):
         Exception.__init__(self)
         self.message = message
