@@ -439,6 +439,7 @@ if __name__ == '__main__':
     try:
         p = Parser("newtest.c")
         t = p.program()
+
     except SLUCSyntaxError as e:
         print(e)
 

@@ -39,7 +39,7 @@ class IDExpr(Expr):
 
     def eval(self, env):  # a + 7
     # lookup the value of self.id. Look up where?
-        return env[self.id].eval(env)
+        return env[self.id]
 
 
 class StringLitExpr(Expr):
@@ -53,7 +53,7 @@ class StringLitExpr(Expr):
         return self.string_lit
 
     def eval(self, env):
-        return str(self.string_lit)
+        return str(self.string_lit).strip('"')
 
 
 class IntLitExpr(Expr):
@@ -179,7 +179,7 @@ class Block(Stmt):
         return "{\n" + str(self.stmts) + "\n\t}"
 
     def eval(self,env):
-        return self.stmts.eval()
+        return self.stmts.eval(env)
 
 
 class IfStmt(Stmt):
@@ -229,9 +229,9 @@ class PrintStmt(Stmt):
                 output += (', ' + str(arg))
         return output + ');'
 
-    def eval(self):
+    def eval(self,env):
         for arg in self.print_args:
-            print(arg.eval(), end = '')
+            print(arg.eval(env), end = '')
 
 
 
@@ -288,6 +288,11 @@ class AssignStmt(Stmt):
 
     def __str__(self):
         return str(self.assign_id) + " = " + str(self.assign_expression) + ";"
+
+    def eval(self,env):
+        val = self.assign_expression.eval(env)
+        print(val)
+        env[self.assign_id] = val
 
 
 class ParamExpr(Expr):
