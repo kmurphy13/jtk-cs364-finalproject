@@ -170,7 +170,7 @@ class Lexer:
         else:
             return "ILLEGAL", 'Invalid character sequence "' + token + '" on line: ' + str(line_num)
 
-    def token_generator(self) -> Generator[Tuple[int, str], None, None]:
+    def token_generator(self) -> Generator[Tuple[Tuple[int, str], str, int ],None,None]:
 
         # keep line number variable
         line_count = 1
