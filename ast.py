@@ -41,17 +41,6 @@ class IDExpr(Expr):
     #     pass
 
 
-class FuncIDExpr:
-    """
-    Creates an instance of an function identifier (sum_3_or_5)
-    """
-    def __init__(self, identifier: str):
-        self.id = identifier
-
-    def __str__(self):
-        return self.id
-
-
 class StringLitExpr(Expr):
     """
     Creates an instance of a string literal expression ("Our team name is JTK")
