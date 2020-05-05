@@ -158,19 +158,19 @@ class Lexer:
 
     def check_non_singletons(self, token: str, line_num: int):
         if re.match(Lexer.ID[1], token):
-            return (Lexer.ID[0], Lexer.ID[2]), token, line_num
+            return [Lexer.ID[0], Lexer.ID[2]], token, line_num
         elif re.match(Lexer.STRING[1], token):
-            return (Lexer.STRING[0], Lexer.STRING[2]), token, line_num
+            return [Lexer.STRING[0], Lexer.STRING[2]], token, line_num
         elif re.match(Lexer.INT[1], token):
-            return (Lexer.INT[0], Lexer.INT[2]), token, line_num
+            return [Lexer.INT[0], Lexer.INT[2]], token, line_num
         elif re.match(Lexer.REAL[1], token):
-            return (Lexer.REAL[0],Lexer.REAL[2]), token, line_num
+            return [Lexer.REAL[0],Lexer.REAL[2]], token, line_num
         elif re.match(Lexer.COMMENT[1], token):
             return "COMMENT"
         else:
             return "ILLEGAL", 'Invalid character sequence "' + token + '" on line: ' + str(line_num)
 
-    def token_generator(self) -> Generator[Tuple[int, str], None, None]:
+    def token_generator(self) -> Generator[Tuple[Tuple[int, str], None, None]]:
 
         # keep line number variable
         line_count = 1
@@ -182,7 +182,7 @@ class Lexer:
             tokens = (t for t in self.split_patt.split(line) if t)
             for t in tokens:
                 if t in self.singleton_dict:
-                    yield (self.singleton_dict[t], t, line_count)
+                    yield Tuple[self.singleton_dict[t], t], line_count
                 elif "COMMENT" == self.check_non_singletons(t, line_count):
                     pass
                 elif "ILLEGAL" == self.check_non_singletons(t, line_count)[0]:

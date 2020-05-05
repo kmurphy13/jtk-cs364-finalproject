@@ -237,8 +237,8 @@ class Parser:
                         false_part = self.statement(var_dict)
                     return IfStmt(condition, true_part, (false_part if false_part else None))
                 else:
-                    raise SLUCSyntaxError("ERROR: Missing right paren on line {0}".format(self.curr_token[2]))
-        raise SLUCSyntaxError("ERROR: Invalid if statement on line {0}".format(self.curr_token[2]))
+                    raise SLUCSyntaxError("ERROR: Missing right paren in if statement on line {0}".format(self.curr_token[2]))
+        raise SLUCSyntaxError("ERROR: Missing left paren in if statement on line {0}".format(self.curr_token[2]))
 
     def while_statement(self, var_dict):
         """
@@ -435,6 +435,12 @@ class SLUCSyntaxError(Exception):
 
 
 if __name__ == '__main__':
-    p = Parser("test0.c")
-    t = p.program()
-    print(t)
+    try:
+        p = Parser("test0.c")
+        t = p.program()
+        print(t)
+    except SLUCSyntaxError as e:
+        print(e)
+
+
+
