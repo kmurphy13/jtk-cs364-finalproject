@@ -5,11 +5,11 @@ int main() {
     if(i<4)
         print(i, " is less than 4");
     else
-        print(i, " is not less than 4");
+        print(i, " is not less than 4, ");
 
     while(i<15){
         print(i,",");
-        i = i +1 ;
+        i = i + 1 ;
     }
 
 }

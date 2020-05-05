@@ -1,6 +1,8 @@
 from typing import Sequence, Union, Optional, List
 import operator
 
+env = {}
+
 
 # Use a class hierarchy to represent types.
 class Expr:
@@ -8,7 +10,7 @@ class Expr:
     Base class for expressions
     """
 
-    def eval(self, env: Optional[dict]):
+    def eval(self):
         pass
 
 
@@ -22,8 +24,8 @@ class UnaryMinus(Expr):
     def __str__(self):
         return "-({0})".format(str(self.tree))
 
-    def eval(self, env):
-        return -self.tree.eval(env)
+    def eval(self):
+        return -self.tree.eval()
 
 
 class IDExpr(Expr):
@@ -33,12 +35,11 @@ class IDExpr(Expr):
     def __init__(self, identifier: str):
         self.id = identifier
 
-
     def __str__(self):
         return self.id
 
-    def eval(self, env):  # a + 7
-    # lookup the value of self.id. Look up where?
+    def eval(self):  # a + 7
+        global env
         return env[self.id]
 
 
@@ -52,7 +53,7 @@ class StringLitExpr(Expr):
     def __str__(self):
         return self.string_lit
 
-    def eval(self, env):
+    def eval(self):
         return str(self.string_lit).strip('"')
 
 
@@ -66,7 +67,7 @@ class IntLitExpr(Expr):
     def __str__(self):
         return str(self.int_lit)
 
-    def eval(self,env):
+    def eval(self):
         return int(self.int_lit)
 
 
@@ -80,7 +81,7 @@ class FloatLitExpr(Expr):
     def __str__(self):
         return str(self.float_lit)
 
-    def eval(self, env):
+    def eval(self):
         return float(self.float_lit)
 
 
@@ -94,8 +95,9 @@ class BoolExpr(Expr):
     def __str__(self):
         return str(self.bool_val)
 
-    def eval(self,env):
+    def eval(self):
         return bool(self.bool_val)
+
 
 class BinaryExpr(Expr):
     """
@@ -112,9 +114,9 @@ class BinaryExpr(Expr):
     def __str__(self):
         return "(" + str(self.left) + " " + str(self.op) + " " + str(self.right) + ")"
 
-    def eval(self,env) -> Union[int, float]:
-        l = self.left.eval(env)
-        r = self.right.eval(env)
+    def eval(self):
+        l = self.left.eval()
+        r = self.right.eval()
         opdict = {
             '+': operator.add(l, r),
             '-': operator.sub(l, r),
@@ -141,11 +143,11 @@ class Stmt:
     def __str__(self):
         return self
 
-    def eval(self,env):
+    def eval(self):
         pass
 
 
-class Statements():
+class Statements:
     """
     Base class for a list of statements
     """
@@ -160,9 +162,9 @@ class Statements():
                 output += ('\n\t' + str(arg))
         return output
 
-    def eval(self,env):
+    def eval(self):
         for statement in self.statement_list:
-            statement.eval(env)
+            statement.eval()
 
 
 class Block(Stmt):
@@ -178,8 +180,8 @@ class Block(Stmt):
     def __str__(self):
         return "{\n" + str(self.stmts) + "\n\t}"
 
-    def eval(self,env):
-        return self.stmts.eval(env)
+    def eval(self):
+        return self.stmts.eval()
 
 
 class IfStmt(Stmt):
@@ -205,13 +207,11 @@ class IfStmt(Stmt):
         else:
             return 'if (' + str(self.cond) + ') \n\t\t' + str(self.true_part) + '\n'
 
-    def eval(self,env):
-        if self.cond.eval(env):
-            return self.true_part.eval(env)
+    def eval(self):
+        if self.cond.eval():
+            return self.true_part.eval()
         elif self.false_part is not None:
-            return self.false_part.eval(env)
-
-
+            return self.false_part.eval()
 
 
 class PrintStmt(Stmt):
@@ -229,11 +229,9 @@ class PrintStmt(Stmt):
                 output += (', ' + str(arg))
         return output + ');'
 
-    def eval(self,env):
+    def eval(self):
         for arg in self.print_args:
-            print(arg.eval(env), end = '')
-
-
+            print(arg.eval(), end = '')
 
 
 class ReturnStmt(Stmt):
@@ -248,7 +246,7 @@ class ReturnStmt(Stmt):
     def __str__(self):
         return 'return ' + str(self.return_expr) + ';'
 
-    def eval(self,env):
+    def eval(self):
         return self.return_expr.eval()
 
 
@@ -266,13 +264,11 @@ class WhileStmt(Stmt):
         self.statement = while_statement
 
     def __str__(self):
-        return 'while ' + "("+ str(self.expr) + ")" + str(self.statement)
+        return 'while ' + "(" + str(self.expr) + ")" + str(self.statement)
 
-    def eval(self,env):
-        while(self.expr.eval(env)):
-            self.statement.eval(env)
-
-
+    def eval(self):
+        while self.expr.eval():
+            self.statement.eval()
 
 
 class AssignStmt(Stmt):
@@ -289,10 +285,9 @@ class AssignStmt(Stmt):
     def __str__(self):
         return str(self.assign_id) + " = " + str(self.assign_expression) + ";"
 
-    def eval(self,env):
-        val = self.assign_expression.eval(env)
-        print(val)
-        env[self.assign_id] = val
+    def eval(self):
+        global env
+        env[self.assign_id] = self.assign_expression.eval()
 
 
 class ParamExpr(Expr):
@@ -394,23 +389,24 @@ class FunctionDef:
         return sum;
     }
     """
-    def __init__(self, func_type: str, func_id: IDExpr, params: Params, decls: Declarations, stmts: Statements):
+    def __init__(self, func_type: str, func_id: IDExpr, params: Params, decls: Declarations, stmts: Statements, var_dict: dict):
+
         self.func_type = func_type
         self.func_id = func_id
         self.params = params
         self.decls = decls
         self.stmts = stmts
+        self.env = var_dict
 
     def __str__(self):
         return self.func_type + ' ' + str(self.func_id) + "(" + str(self.params) + ") {\n" + str(self.decls) + \
                "\n" + str(self.stmts) + "\n}"
 
-    def eval(self, env):
-        # an environment maps identifiers to values
-        # parameters or local variables
-        # to evaluate a function you evaluate all of the statements
-        # within the environment
-        return self.stmts.eval(env)
+    def eval(self):
+        global env
+        env = self.env
+
+        return self.stmts.eval()
 
 
 class Program:
@@ -428,9 +424,9 @@ class Program:
                 output += ('\n\n' + str(func))
         return output
 
-    def eval(self, env):
+    def eval(self):
         for func in self.funcs:
-            func.eval(env)
+            func.eval()
 
 
 class SLUCTypeError(Exception):

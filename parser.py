@@ -11,6 +11,7 @@ class Parser:
         self.lex = Lexer(fn)
         self.tg = self.lex.token_generator()
         self.curr_token = next(self.tg)
+        self.func_ids = {}
 
     def next_token(self):
         self.curr_token = next(self.tg)
@@ -21,26 +22,24 @@ class Parser:
         Program → { FunctionDef }
         """
         functions = []
-        func_dict = {}
-        curr_func = self.function_def(func_dict)
+        curr_func = self.function_def()
         while curr_func:
             functions.append(curr_func)
-            curr_func = self.function_def(func_dict)
-            func_dict[curr_func.func_id] = curr_func
+            curr_func = self.function_def()
         return Program(functions)
 
-    def function_def(self, func_dict):
+    def function_def(self):
         """
         FunctionDef → Type id ( Params ) { Declarations Statements }
         """
-        var_dict = {x:func_dict[x] for x in func_dict}
-
         func_type = self.type()
         if self.curr_token[0][0] == Lexer.ID.id or self.curr_token[0][0] == Lexer.MAIN.id:
             tmp = self.curr_token
             func_id = tmp[1]
+            var_dict = {x: self.func_ids[x] for x in self.func_ids}
             if func_id in var_dict:
                 raise SLUCSyntaxError("Variable declared line {0} already exists".format(self.curr_token[2]))
+            self.func_ids[func_id] = None
             func_id = IDExpr(tmp[1])
             self.next_token()
             if self.curr_token[1] == Lexer.LPAREN.value:
@@ -52,7 +51,7 @@ class Parser:
                     func_stmts = self.statements(var_dict)
                     if self.curr_token[1] == Lexer.RCBRAC.value:
                         self.next_token()
-                        return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts).eval(var_dict)
+                        return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts, var_dict)
 
                     else:
                         raise SLUCSyntaxError("Missing closing curly bracket on line {0}".format(self.curr_token[2]))
@@ -439,6 +438,7 @@ if __name__ == '__main__':
     try:
         p = Parser("newtest.c")
         t = p.program()
+        t.eval()
 
     except SLUCSyntaxError as e:
         print(e)
