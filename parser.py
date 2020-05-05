@@ -26,7 +26,7 @@ class Parser:
         while curr_func:
             functions.append(curr_func)
             curr_func = self.function_def()
-        return Program(functions)
+        return Program(functions).eval()
 
     def function_def(self):
         """
@@ -213,7 +213,8 @@ class Parser:
             if self.curr_token[0][0] == Lexer.EQ.id:
                 self.next_token()
                 curr_expr = self.expression(var_dict)
-                var_dict[curr_id] = curr_expr
+                if curr_id not in var_dict:
+                    var_dict[curr_id] = curr_expr
                 return AssignStmt(IDExpr(curr_id), curr_expr)
 
         raise SLUCSyntaxError("Invalid assignment statement on line {0}".format(self.curr_token[2]))
@@ -438,7 +439,6 @@ if __name__ == '__main__':
     try:
         p = Parser("newtest.c")
         t = p.program()
-        t.eval()
 
     except SLUCSyntaxError as e:
         print(e)

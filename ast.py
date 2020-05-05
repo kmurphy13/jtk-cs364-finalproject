@@ -40,7 +40,8 @@ class IDExpr(Expr):
 
     def eval(self):  # a + 7
         global env
-        return env[self.id]
+        if self.id in env:
+            return env[self.id]
 
 
 class StringLitExpr(Expr):
@@ -230,8 +231,10 @@ class PrintStmt(Stmt):
         return output + ');'
 
     def eval(self):
+        output = ''
         for arg in self.print_args:
-            print(arg.eval(), end = '')
+            output += str(arg.eval())
+        print(output)
 
 
 class ReturnStmt(Stmt):
@@ -287,7 +290,7 @@ class AssignStmt(Stmt):
 
     def eval(self):
         global env
-        env[self.assign_id] = self.assign_expression.eval()
+        env[self.assign_id.id] = self.assign_expression.eval()
 
 
 class ParamExpr(Expr):
@@ -390,23 +393,20 @@ class FunctionDef:
     }
     """
     def __init__(self, func_type: str, func_id: IDExpr, params: Params, decls: Declarations, stmts: Statements, var_dict: dict):
-
+        global env
         self.func_type = func_type
         self.func_id = func_id
         self.params = params
         self.decls = decls
         self.stmts = stmts
-        self.env = var_dict
+        env = {x: var_dict[x] for x in var_dict}
 
     def __str__(self):
         return self.func_type + ' ' + str(self.func_id) + "(" + str(self.params) + ") {\n" + str(self.decls) + \
                "\n" + str(self.stmts) + "\n}"
 
     def eval(self):
-        global env
-        env = self.env
-
-        return self.stmts.eval()
+        self.stmts.eval()
 
 
 class Program:
@@ -442,9 +442,5 @@ class SLUCTypeError(Exception):
 
 
 if __name__ == '__main__':
-    #binexpr = BinaryExpr(IntLitExpr('5'), IntLitExpr('3'),'+')
-    #print(binexpr)
-
     pass
-    #printstmt = PrintStmt([StringLitExpr("The Answer to 5+3 is "), binexpr]).eval()
 
