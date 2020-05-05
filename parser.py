@@ -435,6 +435,6 @@ class SLUCSyntaxError(Exception):
 
 
 if __name__ == '__main__':
-    p = Parser(sys.argv[1])
+    p = Parser("test0.c")
     t = p.program()
     print(t)

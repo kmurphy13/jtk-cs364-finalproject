@@ -84,7 +84,7 @@ class BinaryExpr(Expr):
         self.op = op
 
     def __str__(self):
-        return str(self.left) + " " + str(self.op) + " " + str(self.right)
+        return "(" + str(self.left) + " " + str(self.op) + " " + str(self.right) + ")"
 
     def eval(self) -> Union[int, float]:
         l = self.left.eval()
