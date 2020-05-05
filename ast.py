@@ -7,7 +7,8 @@ class Expr:
     """
     Base class for expressions
     """
-    pass
+    def eval(self):
+        self.eval()
 
 
 class UnaryMinus(Expr):
