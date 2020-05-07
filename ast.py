@@ -1,7 +1,8 @@
-from typing import Sequence, Union, Optional, List
+from typing import Union, Optional, List, Dict
 import operator
 
 env = {}
+function_dictionary = {}
 
 
 # Use a class hierarchy to represent types.
@@ -9,7 +10,6 @@ class Expr:
     """
     Base class for expressions
     """
-
     def eval(self):
         pass
 
@@ -119,22 +119,22 @@ class BinaryExpr(Expr):
         l = self.left.eval()
         r = self.right.eval()
         opdict = {
-            '+': operator.add(l, r),
-            '-': operator.sub(l, r),
-            '*': operator.mul(l, r),
-            '/': operator.truediv(l, r),
-            '%': operator.mod(l, r),
+            '+': operator.add,
+            '-': operator.sub,
+            '*': operator.mul,
+            '/': operator.truediv,
+            '%': operator.mod,
 
-            '<': operator.lt(l, r),
-            '<=': operator.le(l, r),
-            '==': operator.eq(l, r),
-            '!=': operator.ne(l, r),
-            '>=': operator.ge(l, r),
-            '>': operator.gt(l, r),
-            '||': operator.or_(l, r),
-            '&&': operator.add(l, r),
+            '<': operator.lt,
+            '<=': operator.le,
+            '==': operator.eq,
+            '!=': operator.ne,
+            '>=': operator.ge,
+            '>': operator.gt,
+            '||': operator.or_,
+            '&&': operator.add,
         }
-        return opdict[self.op]
+        return opdict[self.op](l, r)
 
 
 class Stmt:
@@ -145,7 +145,7 @@ class Stmt:
         return self
 
     def eval(self):
-        pass
+        self.eval()
 
 
 class Statements:
@@ -163,8 +163,17 @@ class Statements:
                 output += ('\n\t' + str(arg))
         return output
 
+    def append(self, new_stmts: List[Stmt]):
+        for x in range(len(new_stmts)):
+            self.statement_list.insert(0, new_stmts[x])
+
+    def erase_new_assignments(self, new_stmts: List[Stmt]):
+        self.statement_list = self.statement_list[len(new_stmts):]
+
     def eval(self):
         for statement in self.statement_list:
+            if type(statement) == ReturnStmt:
+                return statement.eval()
             statement.eval()
 
 
@@ -301,7 +310,7 @@ class ParamExpr(Expr):
     param_type param_id
     int x
     """
-    def __init__(self, param_type, param_id):
+    def __init__(self, param_type, param_id: IDExpr):
         self.param_type = param_type
         self.param_id = param_id
 
@@ -325,6 +334,12 @@ class Params:
             for param in self.params[1:]:
                 output += (', ' + str(param))
         return output
+
+    def __len__(self):
+        return len(self.params)
+
+    def __getitem__(self, item):
+        return self.params[item].param_id
 
 
 class DeclarationExpr:
@@ -399,6 +414,7 @@ class FunctionDef:
         self.params = params
         self.decls = decls
         self.stmts = stmts
+        self.var_dict = var_dict
         env = {x: var_dict[x] for x in var_dict}
 
     def __str__(self):
@@ -406,27 +422,70 @@ class FunctionDef:
                "\n" + str(self.stmts) + "\n}"
 
     def eval(self):
-        self.stmts.eval()
+        return self.stmts.eval()
+
+
+class FunctionCallExpr(Expr):
+    """
+    Calls a function
+    """
+    def __init__(self, func_id: IDExpr, args: List[Expr], funcs: Dict[IDExpr, FunctionDef]):
+        global function_dictionary
+        function_dictionary = funcs
+        self.func_def = function_dictionary[func_id.id]
+        self.id = func_id
+        self.arguments = args
+
+    def __str__(self):
+        pass
+        # return str(self.id) + "(" + [str(x) for x in self.arguments] + ");"
+
+    def eval(self):
+        global env
+        # save the environment
+        temp_env = dict(env)
+        # set the environment to the current function environment
+        env = dict(self.func_def.var_dict)
+        new_assignments = []
+        # add all of the parameter assignment statements
+        # TODO convert arguments to an expr then call eval
+        for x in range(len(self.func_def.params)):
+            new_assignments.append(AssignStmt(self.func_def.params[x], self.arguments[x]))
+            env[self.func_def.params[x]] = self.arguments[x]
+            if type(self.arguments[x]) == IDExpr:
+                env[self.arguments[x].id] = temp_env[self.arguments[x].id]
+            print(env)
+        self.func_def.stmts.append(new_assignments)
+        # evaluate the function
+        output = self.func_def.eval()
+        self.func_def.stmts.erase_new_assignments(new_assignments)
+        # reset the original environment
+        env = dict(temp_env)
+        # return the function evaluation
+        return output
 
 
 class Program:
     """
     Creates an instance of a program that is made up of a list of function definitions
     """
-    def __init__(self, funcs: Sequence[FunctionDef]):
+
+    def __init__(self, funcs: Dict[IDExpr, Union[FunctionDef, bool]]):
         self.funcs = funcs
 
     def __str__(self):
         output = ''
         if self.funcs:
-            output += str(self.funcs[0])
-            for func in self.funcs[1:]:
-                output += ('\n\n' + str(func))
+            for func in self.funcs:
+                output += (str(self.funcs[func]) + '\n\n')
         return output
 
     def eval(self):
+        global function_dictionary
+        function_dictionary = self.funcs
         for func in self.funcs:
-            func.eval()
+            if self.funcs[func].func_id.id == 'main':
+                self.funcs[func].eval()
 
 
 class SLUCTypeError(Exception):

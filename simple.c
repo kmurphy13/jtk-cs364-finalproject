@@ -4,12 +4,12 @@ int sum_3_or_5(int n) {
  int i;
  sum = 0;
  i = 0;
- while (i < 4) {
- if (i % 3 == 0 || i % 5 == 0)
- sum = sum + i;
- else sum = 0;
+ while (n < 4) {
+     if (i % 3 == 0 || i % 5 == 0)
+        sum = sum + i;
+     else sum = 0;
 
- i = i + 1;
+     n = n + 1;
  }
  return sum;
 }

@@ -21,10 +21,10 @@ class Parser:
         """
         Program → { FunctionDef }
         """
-        functions = []
+        functions = {}
         curr_func = self.function_def()
         while curr_func:
-            functions.append(curr_func)
+            functions[curr_func.func_id] = curr_func
             curr_func = self.function_def()
         return Program(functions).eval()
 
@@ -35,11 +35,10 @@ class Parser:
         func_type = self.type()
         if self.curr_token[0][0] == Lexer.ID.id or self.curr_token[0][0] == Lexer.MAIN.id:
             tmp = self.curr_token
-            func_id = tmp[1]
+            func_id_val = tmp[1]
             var_dict = {x: self.func_ids[x] for x in self.func_ids}
-            if func_id in var_dict:
+            if func_id_val in var_dict:
                 raise SLUCSyntaxError("Variable declared line {0} already exists".format(self.curr_token[2]))
-            self.func_ids[func_id] = None
             func_id = IDExpr(tmp[1])
             self.next_token()
             if self.curr_token[1] == Lexer.LPAREN.value:
@@ -51,14 +50,48 @@ class Parser:
                     func_stmts = self.statements(var_dict)
                     if self.curr_token[1] == Lexer.RCBRAC.value:
                         self.next_token()
-                        return FunctionDef(func_type, func_id, func_params, func_decls, func_stmts, var_dict)
-
+                        func = FunctionDef(func_type, func_id, func_params, func_decls, func_stmts, var_dict)
+                        self.func_ids[func_id_val] = func
+                        return func
                     else:
                         raise SLUCSyntaxError("Missing closing curly bracket on line {0}".format(self.curr_token[2]))
                 else:
                     raise SLUCSyntaxError("Missing opening curly bracket on line {0}".format(self.curr_token[2]))
         else:
             return False
+
+    def function_call(self):
+        if self.curr_token[1] in self.func_ids:
+            func_id = self.curr_token[1]
+            self.next_token()
+            if self.curr_token[0][0] == Lexer.LPAREN.id:
+                arguments = []
+                type_dict = {
+                    Lexer.BOOL.id: BoolExpr,
+                    Lexer.INT.id: IntLitExpr,
+                    Lexer.FLOAT.id: FloatLitExpr,
+                    Lexer.STRING.id: StringLitExpr,
+                    Lexer.ID.id: IDExpr
+                }
+                self.next_token()
+                while self.curr_token[0][0] != Lexer.RPAREN.id:
+                    # if self.curr_token[0][0] != Lexer.ID.id:
+                    #     tmp = self.curr_token
+                    #     self.next_token()
+                    #     if self.curr_token[0][0] != Lexer.LPAREN.id:
+                    #         self.curr_token = tmp
+                    #         self.function_call()
+                    #     else:
+                    #         self.curr_token = tmp
+
+                    arguments.append(type_dict[self.curr_token[0][0]](self.curr_token[1]))
+                    self.next_token()
+                self.next_token()
+                val = FunctionCallExpr(IDExpr(func_id), arguments, self.func_ids)
+                return val
+        else:
+            raise SLUCSyntaxError("The function {0} called on line {1} does not exist".format(
+                self.curr_token[1], self.curr_token[2]))
 
     def params(self, var_dict):
         """
@@ -68,7 +101,7 @@ class Parser:
 
         while self.curr_token[0][0] != Lexer.RPAREN.id:
             param_type = self.type()
-            if self.curr_token[0][0] == Lexer.ID.id: # using ID in expression
+            if self.curr_token[0][0] == Lexer.ID.id:  # using ID in expression
                 tmp = self.curr_token
                 func_id = tmp[1]
                 if func_id in var_dict:
@@ -120,19 +153,8 @@ class Parser:
         """
         Type → int | bool | float
         """
-        # parse int declaration
-        if self.curr_token[0][0] == Lexer.INTK.id:
-            tmp = self.curr_token
-            self.next_token()
-            return tmp[1]
-        # parse bool declaration
-        if self.curr_token[0][0] == Lexer.BOOL.id:
-            tmp = self.curr_token
-            self.next_token()
-            return tmp[1]
-
-            # parse float declaration
-        if self.curr_token[0][0] == Lexer.FLOAT.id:
+        # parse declaration
+        if self.curr_token[0][0] in {Lexer.INTK.id, Lexer.BOOL.id, Lexer.FLOAT.id}:
             tmp = self.curr_token
             self.next_token()
             return tmp[1]
@@ -160,7 +182,7 @@ class Parser:
         current_token = self.curr_token[0][0]
         value = self.curr_token[1]
         # Check through the possible values for statement
-        statedict = {
+        state_dict = {
             Lexer.LCBRAC.id: self.block,
             Lexer.ID.id: self.assignment,
             Lexer.IF.id: self.if_stmt,
@@ -172,8 +194,8 @@ class Parser:
         if current_token == Lexer.SEMICOLON.id:
             self.next_token()
             return ';'
-        if current_token in statedict.keys():
-            return statedict[current_token](var_dict)
+        if current_token in state_dict.keys():
+            return state_dict[current_token](var_dict)
         else:
             return False
         
@@ -213,8 +235,7 @@ class Parser:
             if self.curr_token[0][0] == Lexer.EQ.id:
                 self.next_token()
                 curr_expr = self.expression(var_dict)
-                if curr_id not in var_dict:
-                    var_dict[curr_id] = curr_expr
+                var_dict[curr_id] = curr_expr
                 return AssignStmt(IDExpr(curr_id), curr_expr)
 
         raise SLUCSyntaxError("Invalid assignment statement on line {0}".format(self.curr_token[2]))
@@ -283,7 +304,7 @@ class Parser:
 
     def print_arg(self, var_dict):
         """
-        PrintArg → Expression | stringlit
+        PrintArg → Expression | stringlit | FunctionCall
         """
         if self.curr_token[0][0] == Lexer.STRING.id:
             tmp = self.curr_token[1]
@@ -381,16 +402,19 @@ class Parser:
 
     def primary(self, var_dict) -> Expr:
         """
-        Primary → id | intlit | floatlit | true | false | ( Expression )
+        Primary → id | intlit | floatlit | true | false | ( Expression ) | FunctionCall
         """
         # parse an ID
         if self.curr_token[0][0] == Lexer.ID.id:
             tmp = self.curr_token
-            self.next_token()
-            if tmp[1] in var_dict:
+            if tmp[1] in var_dict and tmp[1] not in self.func_ids:
+                self.next_token()
                 return IDExpr(tmp[1])
-            raise SLUCSyntaxError("ERROR: Variable '{0}' used on line {1} is not defined".format(
-                tmp[1], self.curr_token[2]))
+            elif tmp[1] in self.func_ids:
+                return self.function_call()
+            else:
+                raise SLUCSyntaxError("ERROR: Variable '{0}' used on line {1} is not defined".format(
+                    tmp[1], tmp[2]))
 
         # parse an integer literal
         if self.curr_token[0][0] == Lexer.INT.id:
