@@ -8,10 +8,9 @@ int main() {
     int y;
     bool z;
 
-    y = 10;
-    x = f(y);
+    y = 5;
+    x = f(f(f(2)));
     print("x equals: ", x);
-    y = x * 8;
     print(y)
     z = true;
     z = z + 33; // does not type check

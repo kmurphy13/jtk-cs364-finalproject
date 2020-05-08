@@ -75,17 +75,15 @@ class Parser:
                 }
                 self.next_token()
                 while self.curr_token[0][0] != Lexer.RPAREN.id:
-                    # if self.curr_token[0][0] != Lexer.ID.id:
-                    #     tmp = self.curr_token
-                    #     self.next_token()
-                    #     if self.curr_token[0][0] != Lexer.LPAREN.id:
-                    #         self.curr_token = tmp
-                    #         self.function_call()
-                    #     else:
-                    #         self.curr_token = tmp
-
-                    arguments.append(type_dict[self.curr_token[0][0]](self.curr_token[1]))
-                    self.next_token()
+                    if self.curr_token[0][0] == Lexer.COMMA.id:
+                        self.next_token()
+                    else:
+                        if self.curr_token[1] in self.func_ids:
+                            func_call = self.function_call()
+                            arguments.append(func_call)
+                        else:
+                            arguments.append(type_dict[self.curr_token[0][0]](self.curr_token[1]))
+                            self.next_token()
                 self.next_token()
                 val = FunctionCallExpr(IDExpr(func_id), arguments, self.func_ids)
                 return val

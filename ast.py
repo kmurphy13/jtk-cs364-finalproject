@@ -414,7 +414,7 @@ class FunctionDef:
         self.params = params
         self.decls = decls
         self.stmts = stmts
-        self.var_dict = var_dict
+        self.environment = var_dict
         env = {x: var_dict[x] for x in var_dict}
 
     def __str__(self):
@@ -430,37 +430,65 @@ class FunctionCallExpr(Expr):
     Calls a function
     """
     def __init__(self, func_id: IDExpr, args: List[Expr], funcs: Dict[IDExpr, FunctionDef]):
-        global function_dictionary
-        function_dictionary = funcs
-        self.func_def = function_dictionary[func_id.id]
+        function_definition = funcs[func_id.id]
+        self.func_def = function_definition
+        self.environment = function_definition.environment
         self.id = func_id
         self.arguments = args
 
     def __str__(self):
-        pass
-        # return str(self.id) + "(" + [str(x) for x in self.arguments] + ");"
+        args = str(self.arguments[0])
+        for arg in self.arguments[1:]:
+            args += ', '
+            args += str(arg)
+        return str(self.id) + "(" + args + ")"
 
     def eval(self):
         global env
+
         # save the environment
         temp_env = dict(env)
-        # set the environment to the current function environment
-        env = dict(self.func_def.var_dict)
+
+        # set the global environment to the current function environment
+        env = dict(self.environment)
         new_assignments = []
+
+        # type_dict
+        type_dict = {
+            bool: BoolExpr,
+            int: IntLitExpr,
+            float: FloatLitExpr,
+            str: StringLitExpr
+        }
+
         # add all of the parameter assignment statements
-        # TODO convert arguments to an expr then call eval
         for x in range(len(self.func_def.params)):
-            new_assignments.append(AssignStmt(self.func_def.params[x], self.arguments[x]))
-            env[self.func_def.params[x]] = self.arguments[x]
-            if type(self.arguments[x]) == IDExpr:
-                env[self.arguments[x].id] = temp_env[self.arguments[x].id]
-            print(env)
+            curr_arg = self.arguments[x]
+            # if there is a FunctionCall argument we need to evaluate it
+            if type(curr_arg) == FunctionCallExpr:
+                env = dict(temp_env)
+                curr_arg = curr_arg.eval()
+                curr_arg = type_dict[type(curr_arg)](curr_arg)
+
+            # if the curr_arg is 'x' for example we want to sent the env {x: 10}
+            if type(curr_arg) == IDExpr:
+                env[curr_arg.id] = temp_env[curr_arg.id]
+
+            # sets the environment at x for example to the curr_arg
+            env[self.func_def.params[x]] = curr_arg
+
+            # assign parameter to argument
+            new_assignments.append(AssignStmt(self.func_def.params[x], curr_arg))
+
         self.func_def.stmts.append(new_assignments)
+
         # evaluate the function
         output = self.func_def.eval()
         self.func_def.stmts.erase_new_assignments(new_assignments)
+
         # reset the original environment
         env = dict(temp_env)
+
         # return the function evaluation
         return output
 
