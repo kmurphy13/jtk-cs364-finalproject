@@ -89,16 +89,25 @@ class Parser:
                                 op = self.curr_token
                                 self.next_token()
                                 right = self.curr_token
-                                arguments.append(
-                                    BinaryExpr(
-                                        type_dict[tmp_tok[0][0]](tmp_tok[1]),
-                                        type_dict[right[0][0]](right[1]),
-                                        op[1]
+                                if tmp_tok[0][0] and right[0][0] in type_dict:
+                                    arguments.append(
+                                        BinaryExpr(
+                                            type_dict[tmp_tok[0][0]](tmp_tok[1]),
+                                            type_dict[right[0][0]](right[1]),
+                                            op[1]
+                                        )
                                     )
-                                )
+                                else:
+                                    raise SLUCTypeError("Unexpected argument '{0}' to binary expression in the function"
+                                                        " call of '{1}' on line {2}"
+                                                        .format(self.curr_token[1], func_id, self.curr_token[2]))
                             # argument is not a binary expr
                             else:
-                                arguments.append(type_dict[tmp_tok[0][0]](tmp_tok[1]))
+                                if tmp_tok[0][0] in type_dict:
+                                    arguments.append(type_dict[tmp_tok[0][0]](tmp_tok[1]))
+                                else:
+                                    raise SLUCTypeError("Unexpected argument '{0}' in the function call of '{1}' on "
+                                                        "line {2}".format(self.curr_token[1], func_id, self.curr_token[2]))
                 self.next_token()
                 val = FunctionCallExpr(IDExpr(func_id), arguments, self.func_ids)
                 return val
