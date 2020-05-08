@@ -100,6 +100,26 @@ class BoolExpr(Expr):
         return bool(self.bool_val)
 
 
+def op_dict():
+    op_dict = {
+        '+': operator.add,
+        '-': operator.sub,
+        '*': operator.mul,
+        '/': operator.truediv,
+        '%': operator.mod,
+
+        '<': operator.lt,
+        '<=': operator.le,
+        '==': operator.eq,
+        '!=': operator.ne,
+        '>=': operator.ge,
+        '>': operator.gt,
+        '||': operator.or_,
+        '&&': operator.add,
+    }
+    return op_dict
+
+
 class BinaryExpr(Expr):
     """
     Base class for binary operation expressions
@@ -118,22 +138,7 @@ class BinaryExpr(Expr):
     def eval(self):
         l = self.left.eval()
         r = self.right.eval()
-        opdict = {
-            '+': operator.add,
-            '-': operator.sub,
-            '*': operator.mul,
-            '/': operator.truediv,
-            '%': operator.mod,
-
-            '<': operator.lt,
-            '<=': operator.le,
-            '==': operator.eq,
-            '!=': operator.ne,
-            '>=': operator.ge,
-            '>': operator.gt,
-            '||': operator.or_,
-            '&&': operator.add,
-        }
+        opdict = op_dict()
         return opdict[self.op](l, r)
 
 

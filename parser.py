@@ -70,7 +70,6 @@ class Parser:
                     Lexer.BOOL.id: BoolExpr,
                     Lexer.INT.id: IntLitExpr,
                     Lexer.FLOAT.id: FloatLitExpr,
-                    Lexer.STRING.id: StringLitExpr,
                     Lexer.ID.id: IDExpr
                 }
                 self.next_token()
@@ -82,8 +81,24 @@ class Parser:
                             func_call = self.function_call()
                             arguments.append(func_call)
                         else:
-                            arguments.append(type_dict[self.curr_token[0][0]](self.curr_token[1]))
+                            tmp_tok = self.curr_token
                             self.next_token()
+
+                            # check for BinaryExpr
+                            if self.curr_token[1] in op_dict():
+                                op = self.curr_token
+                                self.next_token()
+                                right = self.curr_token
+                                arguments.append(
+                                    BinaryExpr(
+                                        type_dict[tmp_tok[0][0]](tmp_tok[1]),
+                                        type_dict[right[0][0]](right[1]),
+                                        op[1]
+                                    )
+                                )
+                            # argument is not a binary expr
+                            else:
+                                arguments.append(type_dict[tmp_tok[0][0]](tmp_tok[1]))
                 self.next_token()
                 val = FunctionCallExpr(IDExpr(func_id), arguments, self.func_ids)
                 return val

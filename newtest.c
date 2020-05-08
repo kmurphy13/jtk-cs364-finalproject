@@ -1,6 +1,16 @@
-int f(int n) {
-    return n * n;
+int f(int n, int f) {
+    print(n);
+    print(f);
+    return n * f;
 }
+
+//int exp(int x, int y) {
+//    if (y == 0)
+//        return 1;
+//    else
+//        return x*exp(x,y-1);
+//    print(y);
+//}
 
 int main() {
 
@@ -9,16 +19,11 @@ int main() {
     bool z;
 
     y = 5;
-    x = f(f(f(2)));
+    print(y);
+    x = f(2, 3-1);
     print("x equals: ", x);
     print(y)
     z = true;
     z = z + 33; // does not type check
     print(z);
-
-    while (x > 0) {
-        if (x % 2 == 0)
-            print(x);
-        x = x - 1;
-    }
 }
