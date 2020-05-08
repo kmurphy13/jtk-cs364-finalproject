@@ -1,6 +1,4 @@
 int f(int n, int f) {
-    print(n);
-    print(f);
     return n * f;
 }
 
@@ -15,15 +13,17 @@ int f(int n, int f) {
 int main() {
 
     int x;
-    int y;
-    bool z;
+    float y;
+    int z;
 
     y = 5;
+    print(y);
+    y = 5.2;
     print(y);
     x = f(2, 3-1);
     print("x equals: ", x);
     print(y)
-    z = true;
-    z = z + 33; // does not type check
+//    z = true;
+//    z = z + 33; // does not type check
     print(z);
 }

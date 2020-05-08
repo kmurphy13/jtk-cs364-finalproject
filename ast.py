@@ -2,6 +2,7 @@ from typing import Union, Optional, List, Dict
 import operator
 
 env = {}
+types = {}
 
 
 # Use a class hierarchy to represent types.
@@ -130,6 +131,20 @@ class BinaryExpr(Expr):
         self.left = left
         self.right = right
         self.op = op
+        if type(left) in {BoolExpr, IntLitExpr, FloatLitExpr} and type(right) in {BoolExpr, IntLitExpr, FloatLitExpr}:
+            if type(left) != type(right):
+                if type(left) in {IntLitExpr, FloatLitExpr} and type(right) in {IntLitExpr, FloatLitExpr}:
+                    # left is an int and right is a float
+                    if type(left) == IntLitExpr:
+                        self.left = FloatLitExpr(str(left))
+                    # right is an int and left is a float
+                    else:
+                        self.right = FloatLitExpr(str(right))
+                else:
+                    l = left.eval()
+                    r = right.eval()
+                    raise SLUCTypeError("Incompatible types {0} and {1} of values {2} and {3} in binary expression"
+                                        .format(type(l), type(r), l, r))
 
     def __str__(self):
         return "(" + str(self.left) + " " + str(self.op) + " " + str(self.right) + ")"
@@ -297,6 +312,15 @@ class AssignStmt(Stmt):
     def __init__(self, assign_id: IDExpr, assign_expression: Expr):
         self.assign_id = assign_id
         self.assign_expression = assign_expression
+        assign_val = assign_expression.eval()
+        assign_type = type(assign_val).__name__
+        if assign_type != types[str(assign_id)]:
+            if assign_type == 'float' and types[str(assign_id)] == 'int':
+                self.assign_expression = IntLitExpr(str(int(assign_val)))
+            elif assign_type == 'int' and types[str(assign_id)] == 'float':
+                self.assign_expression = FloatLitExpr(str(float(assign_val)))
+            else:
+                raise SLUCTypeError("Incompatible types on assignment of variable {0} to {1}".format(assign_id, assign_val))
 
     def __str__(self):
         return str(self.assign_id) + " = " + str(self.assign_expression) + ";"
@@ -317,6 +341,8 @@ class ParamExpr(Expr):
     def __init__(self, param_type, param_id: IDExpr):
         self.param_type = param_type
         self.param_id = param_id
+
+        types[str(param_id)] = param_type
 
     def __str__(self):
         return str(self.param_type) + ' ' + str(self.param_id)
@@ -357,6 +383,7 @@ class DeclarationExpr:
     def __init__(self, dec_type, dec_id):
         self.type = dec_type
         self.id = dec_id
+        types[str(dec_id)] = dec_type
 
     def __str__(self):
         return "\t" + str(self.type) + ' ' + str(self.id) + ';'
