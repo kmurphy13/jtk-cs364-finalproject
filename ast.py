@@ -2,7 +2,6 @@ from typing import Union, Optional, List, Dict
 import operator
 
 env = {}
-function_dictionary = {}
 
 
 # Use a class hierarchy to represent types.
@@ -514,8 +513,6 @@ class Program:
         return output
 
     def eval(self):
-        global function_dictionary
-        function_dictionary = self.funcs
         for func in self.funcs:
             if self.funcs[func].func_id.id == 'main':
                 self.funcs[func].eval()

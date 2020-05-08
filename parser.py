@@ -89,7 +89,7 @@ class Parser:
                                 op = self.curr_token
                                 self.next_token()
                                 right = self.curr_token
-                                if tmp_tok[0][0] and right[0][0] in type_dict:
+                                if tmp_tok[0][0] in type_dict and right[0][0] in type_dict:
                                     arguments.append(
                                         BinaryExpr(
                                             type_dict[tmp_tok[0][0]](tmp_tok[1]),
