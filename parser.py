@@ -484,7 +484,10 @@ class SLUCSyntaxError(Exception):
 if __name__ == '__main__':
     try:
         p = Parser("newtest.c")
-        t = p.program()
+        try:
+            t = p.program()
+        except SLUCTypeError as e:
+            print(e)
 
     except SLUCSyntaxError as e:
         print(e)

@@ -13,10 +13,12 @@ int f(int n, int f) {
 int main() {
 
     int x;
-    int y;
-    bool z;
+    float y;
+    int z;
 
     y = 5;
+    print(y);
+    y = 5.2;
     print(y);
     x = f(2, 3-1);
     print("x equals: ", x);
@@ -28,4 +30,9 @@ int main() {
         x = x-1;
 
     }
+
+//    z = true;
+//    z = z + 33; // does not type check
+    print(z);
+
 }
