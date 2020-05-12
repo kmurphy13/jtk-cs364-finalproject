@@ -1,6 +1,4 @@
 int f(int n, int f) {
-    print(n);
-    print(f);
     return n * f;
 }
 
@@ -25,5 +23,9 @@ int main() {
     print(y)
     z = true;
     z = z + 33; // does not type check
-    print(z);
+    while (x>0){
+        print(x);
+        x = x-1;
+
+    }
 }

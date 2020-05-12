@@ -1,10 +1,35 @@
 from collections import namedtuple
-from typing import Generator, Tuple
+from typing import Generator, Tuple, Union
 import re
 import sys
 
 
+def check_non_singletons(token: str, line_num: int) -> Union[Tuple[Tuple[int, str], str, int], str, Tuple[str, str]]:
+    """
+    Function to check a token's match if it is not a singleton
+    :param token: Token to be checked
+    :param line_num: Line number of the token
+    :return: A tuple of the ID and type, the token, and the line number
+    """
+
+    if re.match(Lexer.ID[1], token):
+        return (Lexer.ID[0], Lexer.ID[2]), token, line_num
+    elif re.match(Lexer.STRING[1], token):
+        return (Lexer.STRING[0], Lexer.STRING[2]), token, line_num
+    elif re.match(Lexer.INT[1], token):
+        return (Lexer.INT[0], Lexer.INT[2]), token, line_num
+    elif re.match(Lexer.REAL[1], token):
+        return (Lexer.REAL[0], Lexer.REAL[2]), token, line_num
+    elif re.match(Lexer.COMMENT[1], token):
+        return "COMMENT"
+    else:
+        return "ILLEGAL", 'Invalid character sequence "' + token + '" on line: ' + str(line_num)
+
+
 class Lexer:
+    """
+    Class that represents a lexical analyzer and generates valid lexical tokens
+    """
 
     # class variables that represent a code for a "kind" of token.
 
@@ -56,13 +81,13 @@ class Lexer:
     MOD = Token(39, '%', 'modulus')
     NOT = Token(40, '!', 'not')
     LOR = Token(41, '||', 'logical or')
-    RET = Token(42, 'return','keyword')
+    RET = Token(42, 'return', 'keyword')
 
     # dictionary of singleton tokens
     singleton_dict = {
         PLUS[1]: (PLUS[0], PLUS[2]),
         LPAREN[1]: (LPAREN[0], LPAREN[2]),
-        RPAREN[1]: (RPAREN[0],RPAREN[2]),
+        RPAREN[1]: (RPAREN[0], RPAREN[2]),
         MULT[1]: (MULT[0], MULT[2]),
         EOF[1]: (EOF[0], EOF[2]),
         PRINT[1]: (PRINT[0], PRINT[2]),
@@ -85,7 +110,7 @@ class Lexer:
         GEQ[1]: (GEQ[0], GEQ[2]),
         MINUS[1]: (MINUS[0], MINUS[2]),
         BITSHIFTL[1]: (BITSHIFTL[0], BITSHIFTL[2]),
-        BITSHIFTR[1]: (BITSHIFTR[0],BITSHIFTR[2]),
+        BITSHIFTR[1]: (BITSHIFTR[0], BITSHIFTR[2]),
         COMMA[1]: (COMMA[0], COMMA[2]),
         SEMICOLON[1]: (SEMICOLON[0], SEMICOLON[2]),
         EQ[1]: (EQ[0], EQ[2]),
@@ -101,12 +126,13 @@ class Lexer:
         RET[1]: (RET[0], RET[2])
     }
 
+    # regex patterns for splitting the file
     split_patt = re.compile(
         r"""               #  Split on:
-           \s     |        #  whitespace
+           \s             |        #  whitespace
            ((?<!\de)\+)   |        #  operator: plus
-           (\*)   |        #  operator: times
-           (/(?!/))  |        #  operator: divide
+           (\*)           |        #  operator: times
+           (/(?!/))       |        #  operator: divide
            ((?<!\de)-)    |        #  operator: subtract 
            (<<)   |        #  operator: bitshift left
            (>>)   |        #  operator: bitshift right
@@ -149,49 +175,45 @@ class Lexer:
     )
 
     def __init__(self, fn: str):
+        """
+        Initialize the lexer by opening the file
+        :param fn: The file name
+        """
+
         try:
-            self.f = open(fn)
+            self.file = open(fn)
         except IOError:
             print("File {} not found".format(fn))
             print("Exiting")
             sys.exit(0)  # can't go on
 
-    def check_non_singletons(self, token: str, line_num: int):
-        if re.match(Lexer.ID[1], token):
-            return (Lexer.ID[0], Lexer.ID[2]), token, line_num
-        elif re.match(Lexer.STRING[1], token):
-            return (Lexer.STRING[0], Lexer.STRING[2]), token, line_num
-        elif re.match(Lexer.INT[1], token):
-            return (Lexer.INT[0], Lexer.INT[2]), token, line_num
-        elif re.match(Lexer.REAL[1], token):
-            return (Lexer.REAL[0],Lexer.REAL[2]), token, line_num
-        elif re.match(Lexer.COMMENT[1], token):
-            return "COMMENT"
-        else:
-            return "ILLEGAL", 'Invalid character sequence "' + token + '" on line: ' + str(line_num)
-
-    def token_generator(self) -> Generator[Tuple[Tuple[int, str], str, int ],None,None]:
+    def token_generator(self) -> Generator[Tuple[Tuple[int, str], str, int], None, None]:
+        """
+        Generates the tokens
+        :return: yields the token with necessary information
+        """
 
         # keep line number variable
         line_count = 1
 
         # iterate over all off the lines in the file
-        for line in self.f:
+        for line in self.file:
 
             # get the tokens on the line
-            tokens = (t for t in self.split_patt.split(line) if t)
-            for t in tokens:
-                if t in self.singleton_dict:
-                    yield self.singleton_dict[t], t, line_count
-                elif "COMMENT" == self.check_non_singletons(t, line_count):
+            tokens = (token for token in self.split_patt.split(line) if token)
+            for token in tokens:
+                if token in self.singleton_dict:
+                    yield self.singleton_dict[token], token, line_count
+                elif check_non_singletons(token, line_count) == "COMMENT":
                     pass
-                elif "ILLEGAL" == self.check_non_singletons(t, line_count)[0]:
+                elif check_non_singletons(token, line_count)[0] == "ILLEGAL":
                     # invalid token
                     print()
-                    print(self.check_non_singletons(t, line_count)[1])
+                    print(check_non_singletons(token, line_count)[1])
                     print()
                 else:
-                    yield self.check_non_singletons(t, line_count)  # testing regex
+                    # testing regex match for non singleton
+                    yield check_non_singletons(token, line_count)
             # increment line count
             line_count += 1
 
@@ -204,17 +226,16 @@ if __name__ == "__main__":
     lex = Lexer(sys.argv[1])
 
     # generate tokens
-    g = lex.token_generator()
+    generator = lex.token_generator()
 
     # print headers
-    print("%-20s %-65s %-20s" %("Token", "Name", "Line Number"))
-    print("-----------------------------------------------------------------------------------------------------")
+    print("%-20s %-65s %-20s" % ("Token", "Name", "Line Number"))
+    print("-"*100)
 
     while True:
         try:
-            p = next(g)
-            print("%-20s %-65s %-20i" %(p[0][1], p[1], p[2]))
-            print(p)
+            curr = next(generator)
+            print("%-20s %-65s %-20i" % (curr[0][1], curr[1], curr[2]))
         except StopIteration:
             print("Done")
             break
